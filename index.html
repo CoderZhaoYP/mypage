@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>精美两级盲盒抽奖</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .prize-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .box-section {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ffdd40;
+        }
+
+        .section-info {
+            font-size: 0.9rem;
+            color: #ffdd40;
+            margin-bottom: 10px;
+            text-align: center;
+            background: rgba(255, 221, 64, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        .blind-box {
+            width: 180px;
+            height: 180px;
+            perspective: 1000px;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+
+        .box-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .box-open .box-inner {
+            transform: rotateY(180deg);
+        }
+
+        .box-front,
+        .box-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .box-front {
+            background: linear-gradient(145deg, #ff7700, #ffaa00);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-back {
+            background: linear-gradient(145deg, #00b4db, #0083b0);
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .box-back h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .box-back p {
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .box-icon {
+            font-size: 4rem;
+            color: white;
+        }
+
+        .open-btn {
+            margin-top: 15px;
+            padding: 16px 30px;
+            background: linear-gradient(to right, #ff8a00, #ff2070);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            min-height: 54px;
+            min-width: 200px;
+            width: 100%;
+            max-width: 300px;
+            touch-action: manipulation;
+        }
+
+        .open-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .open-btn:active {
+            transform: translateY(1px);
+        }
+
+        .open-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .history-section {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .history-title {
+            font-size: 1.5rem;
+            color: #ffdd40;
+        }
+
+        .clear-history {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            padding: 10px 18px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 44px;
+            font-size: 1rem;
+        }
+
+        .clear-history:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .history-list {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.5s;
+            min-height: 60px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prize-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .prize-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .prize-time {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 3px;
+        }
+
+        .download-btn {
+            background: linear-gradient(to right, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 44px;
+            min-width: 90px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(to right, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .magnet-link {
+            color: #00bfff;
+            font-size: 0.8rem;
+            margin-top: 2px;
+            padding: 2px 5px;
+            background: rgba(0, 191, 255, 0.1);
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* 响应式设计 */
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .prize-container {
+                flex-direction: row;
+            }
+
+            .box-section {
+                flex: 1;
+            }
+
+            .blind-box {
+                width: 200px;
+                height: 200px;
+            }
+
+            .open-btn {
+                width: auto;
+            }
+        }
+
+        @media (min-width: 480px) and (max-width: 767px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .blind-box {
+                width: 200px;
+                height: 200px;
+            }
+
+            .open-btn {
+                max-width: 250px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .blind-box {
+                width: 160px;
+                height: 160px;
+            }
+
+            .box-icon {
+                font-size: 3.5rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .download-btn {
+                align-self: flex-end;
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.7;
+            animation: confetti-fall 5s linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 1000;
+            max-width: 300px;
+            word-break: break-word;
+            font-weight: 500;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+        }
+
+        .notification.info {
+            background: rgba(33, 150, 243, 0.95);
+            color: white;
+        }
+
+        .notification.warning {
+            background: rgba(255, 152, 0, 0.95);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                text-align: center;
+            }
+        }
+
+        .level-badge {
+            background: linear-gradient(to right, #ff8a00, #ff2070);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        .prize-counter {
+            font-size: 0.9rem;
+            color: #ffdd40;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .prize-counter span {
+            font-weight: bold;
+            color: white;
+        }
+
+        .prize-category {
+            display: inline-block;
+            padding: 2px 6px;
+            background: rgba(255, 221, 64, 0.2);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>幸运盲盒抽奖</h1>
+            <p class="subtitle">开启你的幸运盲盒，赢取精美奖品！</p>
+        </header>
+
+        <div class="prize-container">
+            <div class="box-section">
+                <h2 class="section-title">一级盲盒奖品</h2>
+                <div class="section-info">抽中可开启对应二级盲盒</div>
+                <div class="blind-box">
+                    <div class="box-inner">
+                        <div class="box-front">
+                            <div class="box-icon">🎁</div>
+                            <p>点击开启盲盒</p>
+                        </div>
+                        <div class="box-back">
+                            <h3 id="first-level-prize">谢谢参与</h3>
+                            <p id="first-level-desc">祝下次好运！</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="open-btn" id="first-level-btn">开启一级盲盒</button>
+                <div class="prize-counter" id="first-level-counter">剩余奖品: <span></span></div>
+            </div>
+
+            <div class="box-section" id="second-level-container" style="display: none;">
+                <h2 class="section-title">二级盲盒奖品</h2>
+                <div class="section-info" id="second-level-info">当前奖项: <span id="current-award"></span></div>
+                <div class="blind-box">
+                    <div class="box-inner">
+                        <div class="box-front">
+                            <div class="box-icon">🎉</div>
+                            <p>点击开启二级盲盒</p>
+                        </div>
+                        <div class="box-back">
+                            <h3 id="second-level-prize">谢谢参与</h3>
+                            <p id="second-level-desc">祝下次好运！</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="open-btn" id="second-level-btn">开启二级盲盒</button>
+                <div class="prize-counter" id="second-level-counter">剩余奖品: <span></span></div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <h2 class="history-title">抽奖记录</h2>
+                <div>
+                    <button class="clear-history" id="clear-history-btn">清空记录</button>
+                    <button class="clear-history" id="reset-lottery-btn">重置抽奖</button>
+                </div>
+            </div>
+            <div class="history-list" id="history-list">
+                <div class="history-item">
+                    <div class="prize-info">
+                        <div class="prize-name">欢迎来到盲盒抽奖</div>
+                        <div class="prize-time">点击上方开启盲盒</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add('show');
+            if (type === 'success') {
+                notification.classList.add('success');
+            } else if (type === 'warning') {
+                notification.classList.add('warning');
+            } else {
+                notification.classList.add('info');
+            }
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 检测是否为夸克浏览器
+        function isQuarkBrowser() {
+            return /Quark/i.test(navigator.userAgent);
+        }
+
+        // 处理磁力链接下载
+        function handleMagnetDownload(magnetLink, event) {
+            event.preventDefault();
+
+            if (isQuarkBrowser()) {
+
+                window.location.href = magnetLink;
+
+                setTimeout(() => {
+                    try {
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.style.position = 'absolute';
+                        iframe.style.left = '-9999px';
+                        iframe.src = magnetLink;
+                        document.body.appendChild(iframe);
+
+                        setTimeout(() => {
+                            if (iframe.parentNode) {
+                                document.body.removeChild(iframe);
+                            }
+                        }, 3000);
+                    } catch (e) {
+                        console.error('备用方案失败:', e);
+                    }
+                }, 500);
+
+            } else {
+                copyToClipboard(magnetLink);
+                showNotification('磁力链接已复制，请使用下载工具打开', 'info');
+            }
+        }
+
+        // 洗牌算法
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 一级奖品数据
+            const firstLevelPrizes = [
+                { name: "枫花恋", secondChance: true },
+                { name: "高桥圣子", secondChance: true },
+                { name: "河北彩花", secondChance: true },
+                { name: "葵司", secondChance: true },
+                { name: "葵伊吹", secondChance: true },
+                { name: "濑户环奈", secondChance: true },
+                { name: "泷泽萝拉", secondChance: true },
+                { name: "美竹铃", secondChance: true },
+                { name: "桥本有菜", secondChance: true },
+                { name: "山手梨爱", secondChance: true },
+                { name: "水卜樱", secondChance: true },
+                { name: "桃谷绘里香", secondChance: true },
+                { name: "桃乃木", secondChance: true },
+                { name: "伊藤圣夏", secondChance: true },
+                { name: "伊藤舞雪", secondChance: true },
+                { name: "樱空桃", secondChance: true },
+                { name: "安斋拉拉", secondChance: true },
+                { name: "爱弓凉", secondChance: true },
+                { name: "枫富爱", secondChance: true },
+                { name: "泷本雫叶", secondChance: true },
+                { name: "凉森玲梦", secondChance: true },
+                { name: "天使亚梦", secondChance: true },
+                { name: "一心绘里香", secondChance: true },
+                { name: "三澄宁宁", secondChance: true },
+                { name: "紫堂留衣", secondChance: true },
+                { name: "橘日菜", secondChance: true },
+                { name: "小坂七香", secondChance: true },
+                { name: "宫下玲奈", secondChance: true },
+                { name: "天川空", secondChance: true },
+                { name: "小野夕子", secondChance: true },
+                { name: "百田光希", secondChance: true },
+                { name: "蓝芽水月", secondChance: true },
+                { name: "藤森里穗", secondChance: true },
+                { name: "林由奈", secondChance: true },
+                { name: "铃木心春", secondChance: true },
+                { name: "七濑爱丽丝", secondChance: true },
+                { name: "奶葵", secondChance: true },
+            ];
+
+            // 二级奖品数据 - 按奖项分类，格式修正为对象数组
+            const secondLevelPrizesByAward = {
+                "奶葵": [
+                    { name: "magnet:?xt=urn:btih:76d31ac2e87941c688cf5ad022184fdcc0982667" },
+                    { name: "magnet:?xt=urn:btih:bc16eac0097306f07f552ecdf09d6c40815209b3" },
+                    { name: "magnet:?xt=urn:btih:13a14b5a3905c34f66ae89f5f31fc7a8244bd086" },
+                    { name: "magnet:?xt=urn:btih:89fda5037d50abcaa404364d67201a6e90b6f9ad" },
+                    { name: "magnet:?xt=urn:btih:62b53ddc1eca9e12f22c2860dd54a0a6bbd54eaa" },
+                    { name: "magnet:?xt=urn:btih:7eaefd1bdade92f8ca4187a3549fb97687cea134" },
+                    { name: "magnet:?xt=urn:btih:dad0f5a56da039af339459e6f96cfd98bc90c031" },
+                    { name: "magnet:?xt=urn:btih:4a4914a7cd7c77d7bccb169d688728f845c9fe92" },
+                    { name: "magnet:?xt=urn:btih:e8ad797ce108bf1b6b61e8c0740dd5cf819f5b1f" },
+                    { name: "magnet:?xt=urn:btih:a1441f92b050763b33f0b0443fd82f283c652526" },
+                    { name: "magnet:?xt=urn:btih:2e9ec106fb0fba768fd42f5b95562d390f52dfcc" },
+                    { name: "magnet:?xt=urn:btih:b6160854a2ce0584672c73079a0c63622a67ebcb" },
+                    { name: "magnet:?xt=urn:btih:f9c8bb80eb28b5538ba7fdf958886aaeef5cdd42" },
+                    { name: "magnet:?xt=urn:btih:33387053735ff416415e51461ac4dab84ff0879a" },
+                    { name: "magnet:?xt=urn:btih:78c5d36f265a78b305e08c385bd60a697d05d256" },
+                    { name: "magnet:?xt=urn:btih:9aea3b194c090e33808b0409ae6e5c8686bcdad3" },
+                    { name: "magnet:?xt=urn:btih:2c4e4bb474c021645c145ac3df2c78858c3be16f" },
+                    { name: "magnet:?xt=urn:btih:e65eb82ea6d91d53a8b5359495752e1420a389c2" }
+                ],
+                "七濑爱丽丝": [
+                    { name: "magnet:?xt=urn:btih:faa30f8fc9791f26fcbfec184ce3d724fcbed93e" },
+                    { name: "magnet:?xt=urn:btih:d7ac5744b8beed299212f11a7a12412c6a052e77" },
+                    { name: "magnet:?xt=urn:btih:58a0fc0ef407e32786a464d9f5e27f494f791b1e" },
+                    { name: "magnet:?xt=urn:btih:3e6df68238ec3aa6df6068475a43b7266f88b955" },
+                    { name: "magnet:?xt=urn:btih:0404ff43832e6f8d6c2f5a54470d4c1ee390dd3c" },
+                    { name: "magnet:?xt=urn:btih:15862f58f19995b1f70bcabd0fe258123d3d56de" },
+                    { name: "magnet:?xt=urn:btih:e174954d74e56f5a93aba317629f3ca82c58236e" },
+                    { name: "magnet:?xt=urn:btih:d3b257fb866c0b5c05e4c0d156adde2edb3527b3" },
+                    { name: "magnet:?xt=urn:btih:1e2c93260a8417cb8db5b95822990ff8cb894288" },
+                    { name: "magnet:?xt=urn:btih:b004fafd277da74992c2d019b99519cb7129801f" },
+                    { name: "magnet:?xt=urn:btih:cd2e452e3a98ba68d054433b3ebb72b4fb9af41c" },
+                    { name: "magnet:?xt=urn:btih:ffbd1db1cc36f57c28360521a0d3afd7ddcb56e8" },
+                    { name: "magnet:?xt=urn:btih:566dd52f6effc113c1f92de1c6e09c8914993c2c" },
+                    { name: "magnet:?xt=urn:btih:118d0b67bbcd6389198c3107e02ea49a0dd8939a" },
+                    { name: "magnet:?xt=urn:btih:a445473fb58c634cbf4ef35c5bc4bd643e06bc19" },
+                    { name: "magnet:?xt=urn:btih:4135d0ae3e53cae60e3ebe765ded589da21ff8f0" },
+                    { name: "magnet:?xt=urn:btih:ff4ec9b19ea161f6a3cec56462845c09c2c1dd28" },
+                    { name: "magnet:?xt=urn:btih:dafa39b9f7c4235f7483ec1856bd62ce9fe9687e" },
+                    { name: "magnet:?xt=urn:btih:f506069cdb07e1943f0c6055500b40cf3b243ca4" },
+                    { name: "magnet:?xt=urn:btih:896d55c3c1f92f68e0a2b0f34988df15ec28467f" },
+                    { name: "magnet:?xt=urn:btih:bad598a4ceb19566dda04a38926310e40ef73d5b" },
+                    { name: "magnet:?xt=urn:btih:ce5c46c5e04e63268b5f28c28592298cdeae6b58" },
+                    { name: "magnet:?xt=urn:btih:249c8530f454635bd1530e0c3eb917e4eea3e037" },
+                    { name: "magnet:?xt=urn:btih:daea17eb54403fcbaa1534a9751dfb849943f34e" },
+                    { name: "magnet:?xt=urn:btih:e31b8f606a0354b6a310a2e8cc827a6c50d44dbe" },
+                    { name: "magnet:?xt=urn:btih:566b79e0ac15588b0c2185083833d8295c8c2651" },
+                    { name: "magnet:?xt=urn:btih:09d792d430be1c4d9a5f5ab638bd8d96a32dddf2" },
+                    { name: "magnet:?xt=urn:btih:af941ff558314785a9b09902a90b923e2f4e1ebf" },
+                    { name: "magnet:?xt=urn:btih:5d93af17a95d0ef668c0481ecd6cb7a603888d8f" },
+                    { name: "magnet:?xt=urn:btih:903eef731217d7ea012cb5abc706e314799741a9" },
+                    { name: "magnet:?xt=urn:btih:6f8240739bf2bf49ccd1ddb6c3e4537d449aaa15" },
+                    { name: "magnet:?xt=urn:btih:d56b1f96fdad5d911953624bdee5a887a0c1f379" },
+                    { name: "magnet:?xt=urn:btih:26f44ea34a3e8c42f0a0e2b449fd522e08e7969d" },
+                    { name: "magnet:?xt=urn:btih:8185fd34a65b1b368a51f8938635a26c8fa7da7f" }
+                ],
+                "铃木心春": [
+                    { name: "magnet:?xt=urn:btih:b75944ac9d65a2ee9b86f3a440377135fb1b2827" },
+                    { name: "magnet:?xt=urn:btih:f3c68e235fee649bf8a9dcfbc395967420109716" },
+                    { name: "magnet:?xt=urn:btih:e5cf1e546bfb6de2fa2c4043858e60dac922af8e" },
+                    { name: "magnet:?xt=urn:btih:5514098f42d0b8ffd411352d6c8af74e6761478c" },
+                    { name: "magnet:?xt=urn:btih:bb578decc52252fa91b716ed7d4e3db4a59d8a14" },
+                    { name: "magnet:?xt=urn:btih:741ff1fd0a03f47253f5a3885d933a458f0b68f5" },
+                    { name: "magnet:?xt=urn:btih:b7d83878da5cdca9feff54c5715613d768010186" },
+                    { name: "magnet:?xt=urn:btih:27d0cededf172bac7e3dcd87573905f028ea62ec" },
+                    { name: "magnet:?xt=urn:btih:192710bbfea5b64f0df75f7d6175e4cf9ee82f80" },
+                    { name: "magnet:?xt=urn:btih:0b7e36326892afd9f63183a894605eb2ad027607" },
+                    { name: "magnet:?xt=urn:btih:4d9b89f6348602a20eccf131cea6d06e9323a463" },
+                    { name: "magnet:?xt=urn:btih:01a72cbca122cbcbedf64e34f2d192349ebf0ee5" },
+                    { name: "magnet:?xt=urn:btih:d527c329dfd95da13762f97364f64355bccfc2fb" },
+                    { name: "magnet:?xt=urn:btih:bbc8781eab2b85419c5b03172ca29af132062e6e" },
+                    { name: "magnet:?xt=urn:btih:87d5f78a42596bca376615182be421cfc8a90850" },
+                    { name: "magnet:?xt=urn:btih:7032e9ff6d599201bc61747034432f8583286278" },
+                    { name: "magnet:?xt=urn:btih:86a7f59fe41e2b58b5aa012db6dbc792ef9f851e" },
+                    { name: "magnet:?xt=urn:btih:b69959247f111da6c3f148fa376f8bc0a6b1ddf7" },
+                    { name: "magnet:?xt=urn:btih:2cc2c3d7f0f583b62a849221392fc367949cc6e5" },
+                    { name: "magnet:?xt=urn:btih:cd213aed8fdf9e2d2d806ac09fc2be630fcebb43" },
+                    { name: "magnet:?xt=urn:btih:0cc472408d77ae6dcf0bf4363436f00f9e8e5530" },
+                    { name: "magnet:?xt=urn:btih:b17587f206f68aa789d6c3add3fc085f361c3409" },
+                    { name: "magnet:?xt=urn:btih:a173f935eb8add03e6710407b48e0c40b2ed13e7" },
+                    { name: "magnet:?xt=urn:btih:10250b90b0a2f0ee736ea2004b1944988f79d22f" },
+                    { name: "magnet:?xt=urn:btih:292bf700b2e5b4a0845bceef43e0024ea68f6911" },
+                    { name: "magnet:?xt=urn:btih:07f0c83559e88be2683ad64b085ecbf22f785210" },
+                    { name: "magnet:?xt=urn:btih:c5c6d9bdad9ee5a64e6b60c9adf48227e794985a" },
+                    { name: "magnet:?xt=urn:btih:c0d9d4b7da35ce69d3fd7d9d5c7268914b54d67d" },
+                    { name: "magnet:?xt=urn:btih:7dcaf91e8a340c29aba0f9a5f78531bc0d9a3200" }
+                ],
+                "林由奈": [
+                    { name: "magnet:?xt=urn:btih:266c232d7c0e09e31cabd1d90d85aa9d9bf21366" },
+                    { name: "magnet:?xt=urn:btih:627ee4784e0e243b73ad4b37787f86bb9fcbafed" },
+                    { name: "magnet:?xt=urn:btih:2f2ede4fcbb6eaad9d4cdfa86d3abfe543a55feb" },
+                    { name: "magnet:?xt=urn:btih:0c473635ca281c135be23c93220011493b2ee2c2" },
+                    { name: "magnet:?xt=urn:btih:958d76a602060d62f7b084276f36138797bf5063" },
+                    { name: "magnet:?xt=urn:btih:05a134fea7d5ed10c2c32e951999609df3c07251" },
+                    { name: "magnet:?xt=urn:btih:bcaf8ffffde335784c851eaf1f22d2c597ed26e3" },
+                    { name: "magnet:?xt=urn:btih:bc9e4cb3214fcd8f69345dd73f07bf014989ae1a" },
+                    { name: "magnet:?xt=urn:btih:ef85ed848fe24b486a9cd161f95bf8a5f15eb08d" },
+                    { name: "magnet:?xt=urn:btih:e53055504a7a57237025bf65199396c1b53d356d" },
+                    { name: "magnet:?xt=urn:btih:473615979aabe9476651fce470e625f2da67e371" },
+                    { name: "magnet:?xt=urn:btih:723aaa42fd9cd8fb25a6148cbaa484892f385b70" },
+                    { name: "magnet:?xt=urn:btih:28adefc7d0697a4748642170499ec6a237733f39" },
+                    { name: "magnet:?xt=urn:btih:91358938b1a5889b0fb63f553f81faa2e98ed911" },
+                    { name: "magnet:?xt=urn:btih:84a10d2aa881b1db7f928df974d535599ead9944" },
+                    { name: "magnet:?xt=urn:btih:997f02f7e5afea7d2f1e05ce7309fde9a2309bc1" },
+                    { name: "magnet:?xt=urn:btih:34e5ccca3c5f9a709b8dcdbd15e6e0e015643e37" },
+                    { name: "magnet:?xt=urn:btih:4e0c6e53d7ee62307d286cfd173a7e48d7b2042a" },
+                    { name: "magnet:?xt=urn:btih:2365f9ed9d53b7f8c0da22b8f79396d2c206544d" },
+                    { name: "magnet:?xt=urn:btih:787a283939360bc2008c16572e561b9a37137f9f" },
+                    { name: "magnet:?xt=urn:btih:1dcd2cec1819adddbf5031abd097b099e265ba5d" },
+                    { name: "magnet:?xt=urn:btih:0f83873a88f93c4d8918118e420e24f5e1189df0" },
+                    { name: "magnet:?xt=urn:btih:f39ac6f304e7ab898305ff993676d6c88b2f7ae4" },
+                    { name: "magnet:?xt=urn:btih:59f5f22b23c2ddb6eb835c27bf61f874c2c5b1dc" },
+                    { name: "magnet:?xt=urn:btih:a08409e8bb132500bfcf750c896caadbb22b6c85" },
+                    { name: "magnet:?xt=urn:btih:dfc0f9a6fab7a8203ff9f6ed8315bae14ac8082b" },
+                    { name: "magnet:?xt=urn:btih:c16c3810abc380d741b777d77fde4d9a1e2a3816" },
+                    { name: "magnet:?xt=urn:btih:ad84a249b9c20c5fa430a5d0b56dafca091a7b1e" },
+                    { name: "magnet:?xt=urn:btih:0062425b0ff892d3bbccde97ce9bc137cc6c6fa7" },
+                    { name: "magnet:?xt=urn:btih:2aafbba6af9e65518af76844d7831d3996886567" },
+                    { name: "magnet:?xt=urn:btih:76140f6be1f03aa6e686722a26b4d14b7d58c92e" },
+                    { name: "magnet:?xt=urn:btih:baef758b0f1ffcd430c53caea15330daf3303653" },
+                    { name: "magnet:?xt=urn:btih:5cb7d9f1ece31cfb39a8cb7c10369ddabf9297a6" },
+                    { name: "magnet:?xt=urn:btih:703e7443f32ca75050528300d89e19218518d56b" },
+                    { name: "magnet:?xt=urn:btih:41af528b897397846ba8c840abcfa2f105eb0f5e" },
+                    { name: "magnet:?xt=urn:btih:0713694ef54027855d759a199074fa75b632cfa1" }
+                ],
+                "蓝芽水月": [
+                    { name: "magnet:?xt=urn:btih:8c752b38126519d021ed91b5a59b89417aa3e674" },
+                    { name: "magnet:?xt=urn:btih:7c2f117dcccfabcc324bc8e4167465f7ea86a59d" },
+                    { name: "magnet:?xt=urn:btih:9fa5c43998ff2e86b8c5384ae6bc8ca4a9098d7e" },
+                    { name: "magnet:?xt=urn:btih:1a7c5ecd9f62f7f1387cf971b9d16becddd7429f" },
+                    { name: "magnet:?xt=urn:btih:460fd6d10297fc0a577e3795267b276fe355fe62" },
+                    { name: "magnet:?xt=urn:btih:0916691120101cdc571c40dc72229369527285a9" },
+                    { name: "magnet:?xt=urn:btih:410fbd5156be660f4dafd895e269ca398eba788a" },
+                    { name: "magnet:?xt=urn:btih:e4e8f1cc1e2a0683e2daa3df0600d1ea3e8b74cd" },
+                    { name: "magnet:?xt=urn:btih:d8c316b91ae1535b1979fd272ef7b5888a554145" },
+                    { name: "magnet:?xt=urn:btih:9a91b042af36c2b5e4794e2e501efb364e6d5cd2" },
+                    { name: "magnet:?xt=urn:btih:62ba3108f5a04b9cb020a57d5c4a97cccac92cba" },
+                    { name: "magnet:?xt=urn:btih:0bfda41a8d3754b2550b650f46d7b7a80ed82367" },
+                    { name: "magnet:?xt=urn:btih:2047a6308d41ba7619ef67c509ed0221d0f3919f" },
+                    { name: "magnet:?xt=urn:btih:15482c787073704f1f7292bc4b40f4eb960d2fd2" },
+                    { name: "magnet:?xt=urn:btih:593b41e6f3284271c6ec22c8c6c9a22471bb2c36" },
+                    { name: "magnet:?xt=urn:btih:83a2c176c2110c5010b07e15c1f8228095fd278d" },
+                    { name: "magnet:?xt=urn:btih:a02d1244bf8a0c1a1aa518536b3574e9d76d916f" },
+                    { name: "magnet:?xt=urn:btih:28d638cfec361ba12cc079b91cbb12bab78570d7" },
+                    { name: "magnet:?xt=urn:btih:93e010b7192c005e34d9c9c8c4ab59ffcf99303a" },
+                    { name: "magnet:?xt=urn:btih:0693abf30e68ca8dd6d109b4ae76f91b53bacc30" },
+                    { name: "magnet:?xt=urn:btih:1384989ecc9e0dc4d09d4c9ce11f19f082d63cd1" },
+                    { name: "magnet:?xt=urn:btih:d09e97bcdd4c5ebd88242a796b1865ba308507bc" },
+                    { name: "magnet:?xt=urn:btih:57e666813d619532834847d236c2d603319255f1" }
+                ],
+                "藤森里穗": [
+                    { name: "magnet:?xt=urn:btih:fbf1508bcd971eb84fb8a7cf07e834490e92d8cb" },
+                    { name: "magnet:?xt=urn:btih:624f0bf224e6873a7d2e8e38e967d1248fe2f701" },
+                    { name: "magnet:?xt=urn:btih:29b1f96738c22220e29729fc8d3e001cfc2583f7" },
+                    { name: "magnet:?xt=urn:btih:7589427d661aa5cfbc8a30dd349d5fdc5782cf2a" },
+                    { name: "magnet:?xt=urn:btih:bc64c504207ac8d9a031a484df7debf740fabfc2" },
+                    { name: "magnet:?xt=urn:btih:bfef3d3f549a8552428db3bfd5a06e6dd4f7bf9a" },
+                    { name: "magnet:?xt=urn:btih:9ccdcbaa45986608bacdc7be7033844d5d4d223c" },
+                    { name: "magnet:?xt=urn:btih:ce9b53ef6f5036b47a941be1320219accfc31344" },
+                    { name: "magnet:?xt=urn:btih:14d76f4afefbe20f4109357516185f36a5743a87" },
+                    { name: "magnet:?xt=urn:btih:a846adf70d518610a5973fb7cbd00ec19067366e" },
+                    { name: "magnet:?xt=urn:btih:7ca2c84be4d558138c7e5dba608bb713f849ebc0" },
+                    { name: "magnet:?xt=urn:btih:8657b5d6415cd45d762fa7fbddf61508989b2b5c" },
+                    { name: "magnet:?xt=urn:btih:a53ba171c5f26c299e4473a763c0f927b4c09496" },
+                    { name: "magnet:?xt=urn:btih:e9874679f6cf92ee05a670ff97324b874962c907" },
+                    { name: "magnet:?xt=urn:btih:a15e0a1d9baebe6af9b1c697a95295e715945cca" },
+                    { name: "magnet:?xt=urn:btih:f4d0b7949ccc355551c36c71c7d839aa0ca28c7e" },
+                    { name: "magnet:?xt=urn:btih:edd85fd31e6f8baba3a27926de4de001b11295a1" },
+                    { name: "magnet:?xt=urn:btih:fb0692d6fac8c6279f03117883ff82a8f56c1938" },
+                    { name: "magnet:?xt=urn:btih:b9d1e75aa0c0ffcd3e41ee240197b0166afdf90d" },
+                    { name: "magnet:?xt=urn:btih:a8523c0103d57cadf1ab7fa3d706075c7725789a" },
+                    { name: "magnet:?xt=urn:btih:2c291c2cff1e1dba01c0e7d5b97caff98ae3ff36" },
+                    { name: "magnet:?xt=urn:btih:74af3f3d22e849a4c546287442857a2d17503572" },
+                    { name: "magnet:?xt=urn:btih:ca476a9bfb228939c08f1e75af4c3c3d69335309" },
+                    { name: "magnet:?xt=urn:btih:5c771e36e519c5a725501ef72762ab73f11c4fb7" },
+                    { name: "magnet:?xt=urn:btih:2eb2acf81cc4963b9ba31b5591d4731681b5dc4a" },
+                    { name: "magnet:?xt=urn:btih:542b427369e412b40e48595d287f15549cc2bb57" },
+                    { name: "magnet:?xt=urn:btih:9d3ce7c1e38ccb9452d8f5044185b49511d1edaf" },
+                    { name: "magnet:?xt=urn:btih:af6c26ac66e970affd60d70a75b1699a65c4dd2a" },
+                    { name: "magnet:?xt=urn:btih:44f71ddc4ad56ae9ec5fcbff012f6f9a5520a5c2" },
+                    { name: "magnet:?xt=urn:btih:af6c26ac66e970affd60d70a75b1699a65c4dd2a" },
+                    { name: "magnet:?xt=urn:btih:73edca47b5f2f327061d94ab8f6e2daa4f52693f" },
+                    { name: "magnet:?xt=urn:btih:eabbc5c03d8774a0c9ed177dd29f6ccb0815dcef" },
+                    { name: "magnet:?xt=urn:btih:012b4fb60376ed5c13544f0a9a9b4c6e0e38cdb3" },
+                    { name: "magnet:?xt=urn:btih:bb8e5c4994abdef406ac2da6ccadbd7b1f0508a9" },
+                    { name: "magnet:?xt=urn:btih:2b68260b7b7fdffb9b18947ac991b733a424b4df" },
+                    { name: "magnet:?xt=urn:btih:7b83fae4712dcf6727ba56d56d5809cf205cf012" },
+                    { name: "magnet:?xt=urn:btih:f72df90dc76f10601a7374f13007cb1ac28bf234" },
+                    { name: "magnet:?xt=urn:btih:b74ec032e6f033409b5d5fae448729c564cd9985" },
+                    { name: "magnet:?xt=urn:btih:b0a2cdb72b1ff822bcc26fbf5ae5993a58d7577b" },
+                    { name: "magnet:?xt=urn:btih:cc2aa35912286d2bfae69793e6d71be597be8195" },
+                    { name: "magnet:?xt=urn:btih:dcd9c6536d32c24130cc3bd0cee7864139f2d834" },
+                    { name: "magnet:?xt=urn:btih:6df2b3a041f6808781d8766d315b86b2a38bb8f4" },
+                    { name: "magnet:?xt=urn:btih:266c9430425077366624385678cb3d154b5abcb1" },
+                    { name: "magnet:?xt=urn:btih:11326af11b5e883a6b4611c11476989448e5dc7f" },
+                    { name: "magnet:?xt=urn:btih:dbb4fb7056c27ccb7244c0a869a8934e48159e5b" },
+                    { name: "magnet:?xt=urn:btih:92cbab0de4bbfc54e41552ed41caa0562e8e2a3d" }
+                ],
+                "百田光希": [
+                    { name: "magnet:?xt=urn:btih:df4654005329d6ff3311484583749e134cde955f" },
+                    { name: "magnet:?xt=urn:btih:cd751f1960b6c93236ce9e4d5bdf7ba3ec2cd913" },
+                    { name: "magnet:?xt=urn:btih:52f2e22486f0d380b70fbe03af996bba5af61a54" },
+                    { name: "magnet:?xt=urn:btih:18ddfd242e290460c2a7779db15daff13c106fee" },
+                    { name: "magnet:?xt=urn:btih:40de635d2f166b57b4f88424149174c72ed0f384" },
+                    { name: "magnet:?xt=urn:btih:2e4698af60cc41c6dd0e4cf3822d9dfe1bcf8097" },
+                    { name: "magnet:?xt=urn:btih:a2bcc039550df62c9ef43adc674dad09c449df47" },
+                    { name: "magnet:?xt=urn:btih:a8957a7a0ba6812d8efec69727bc6f87ec35ec64" },
+                    { name: "magnet:?xt=urn:btih:2240759b96e04c9fce127b4d5d02c61c6d82e096" },
+                    { name: "magnet:?xt=urn:btih:a01aeff1bd62335d41724839be0f9f7136ec7dd3" },
+                    { name: "magnet:?xt=urn:btih:864380dcaa67ccc3f7d8822a8389cf572d8e961e" },
+                    { name: "magnet:?xt=urn:btih:126e5e17f4761cf77f211a92977c077f8efa72e2" },
+                    { name: "magnet:?xt=urn:btih:6cbece8523c38be54c85f2dd4ecc34717db56a90" },
+                    { name: "magnet:?xt=urn:btih:05356823495d0d568cc12edfa62bff85f7be3680" },
+                    { name: "magnet:?xt=urn:btih:e11aead03fca39cc456d3b68f78494171ae0633c" },
+                    { name: "magnet:?xt=urn:btih:188de4058928c59a63e4e5438b497af36cc93976" }
+                ],
+                "小野夕子": [
+                    { name: "magnet:?xt=urn:btih:6a1767925630a3ee63686a6dd316de987747ad87" },
+                    { name: "magnet:?xt=urn:btih:b224845498e6ebd2a849ba2fdf4b21c44e8e2286" },
+                    { name: "magnet:?xt=urn:btih:0dafd8dc042c439c194c6a8ec0709a8f63e8176a" },
+                    { name: "magnet:?xt=urn:btih:be91357706ad6a8dcf64b35d3b05b3554edc042f" },
+                    { name: "magnet:?xt=urn:btih:1e363d06d9432e03c668401a157a0be3a9f94cc2" },
+                    { name: "magnet:?xt=urn:btih:d9691f08793717c2d4e0ad6ad82886e82434df24" },
+                    { name: "magnet:?xt=urn:btih:0af833d2a0d05649f8d3ebab7d1f4321bcd688c8" },
+                    { name: "magnet:?xt=urn:btih:bdd454022e2955c3bd4408ae43029e79f14694d5" },
+                    { name: "magnet:?xt=urn:btih:b76d9f5fac34e688f024226912054154cf38a631" },
+                    { name: "magnet:?xt=urn:btih:0d45fd897022331b03ac9c392d14c07a55fd7636" },
+                    { name: "magnet:?xt=urn:btih:db26fb7df4ab987912ac36689b3cc0791036f841" },
+                    { name: "magnet:?xt=urn:btih:ee6bf9c06fa370966ebf5f67d39a0d513ea9bea6" },
+                    { name: "magnet:?xt=urn:btih:57d136aa669c5c40b4caef0c4b7efdaba27fb8c8" },
+                    { name: "magnet:?xt=urn:btih:03e0ff92e1be97b968f5447fbcb784d1eceb3af4" },
+                    { name: "magnet:?xt=urn:btih:420b4116e7e046f7317dcc82272ea697438b2155" },
+                    { name: "magnet:?xt=urn:btih:e344ef0550d07b2b2efa2c333bf605093c2f2ba2" },
+                    { name: "magnet:?xt=urn:btih:10d21be9e8a68cf82bf932178860e06d17bf2729" },
+                    { name: "magnet:?xt=urn:btih:beaaf1d59142b36c04e7da3403664a18edfbc769" },
+                    { name: "magnet:?xt=urn:btih:d2b0064be7888ad3132ac8390e28a354f1e9f0e9" },
+                    { name: "magnet:?xt=urn:btih:12a539d490c10f7cf27e285a74fb6f8366a17072" },
+                    { name: "magnet:?xt=urn:btih:433a4062f82a354a8114be72465414b2615e00da" },
+                    { name: "magnet:?xt=urn:btih:25f8fafdbe32c44d240f666a5176031576784aa5" },
+                    { name: "magnet:?xt=urn:btih:944277822b1e48354d84cc2245c1563feea22e7f" },
+                    { name: "magnet:?xt=urn:btih:2630ab3b265ec8c6a0c355ab3de8a83b3884f39f" },
+                    { name: "magnet:?xt=urn:btih:9578943f147d5c37ce194da9e61bc916933f05bf" },
+                    { name: "magnet:?xt=urn:btih:e4e155e620b7093d0de4dd1f0500fe786fe5a6f8" },
+                    { name: "magnet:?xt=urn:btih:d297a0cf6e2942aefd1741b70983578c280fb9c9" },
+                    { name: "magnet:?xt=urn:btih:c976815b096c00c2a663a2205a4a7ffb98b58226" },
+                    { name: "magnet:?xt=urn:btih:597e1ef072560e417a3160c3681858f80baf75e7" },
+                    { name: "magnet:?xt=urn:btih:4c38b5606c629a97cd544a7601005e730464d4f8" },
+                    { name: "magnet:?xt=urn:btih:d726d38453cacb0a488b10353488e2abbff0b71e" },
+                    { name: "magnet:?xt=urn:btih:b2ed40591d398f3f35c37d2ff2172c80398d4d2d" },
+                    { name: "magnet:?xt=urn:btih:94fabdcf7c041eb87362cd8a654565d1993de1a3" },
+                    { name: "magnet:?xt=urn:btih:ea344baa2541a57403dff93f962836a9e9dbb381" },
+                    { name: "magnet:?xt=urn:btih:c4bb75d52d6ff8219e53f06d69e3f4d457639e79" },
+                    { name: "magnet:?xt=urn:btih:306c71180b09af08a4e8b2616317e77f186aa083" },
+                    { name: "magnet:?xt=urn:btih:1d408e57e2bd7a08cc81fb6af9b6ec06c3209b6a" },
+                    { name: "magnet:?xt=urn:btih:1f5eb896dd54a1e88e74391a39c9259d6e14dad6" },
+                    { name: "magnet:?xt=urn:btih:41e9fd9ee5dc0e13dc02dbc3575bfcecc7f0ce03" },
+                    { name: "magnet:?xt=urn:btih:95c32496a127c05938a8e01ccbe387143338fcdd" },
+                    { name: "magnet:?xt=urn:btih:661fa4b881ac9245f433bfe138ee82d9c8e6b5f4" },
+                    { name: "magnet:?xt=urn:btih:60569d7f2bb4d44dec55436e9b640e38d58142eb" },
+                    { name: "magnet:?xt=urn:btih:76d31ac2e87941c688cf5ad022184fdcc0982667" },
+                    { name: "magnet:?xt=urn:btih:bc16eac0097306f07f552ecdf09d6c40815209b3" },
+                    { name: "magnet:?xt=urn:btih:13a14b5a3905c34f66ae89f5f31fc7a8244bd086" },
+                    { name: "magnet:?xt=urn:btih:89fda5037d50abcaa404364d67201a6e90b6f9ad" },
+                    { name: "magnet:?xt=urn:btih:62b53ddc1eca9e12f22c2860dd54a0a6bbd54eaa" },
+                    { name: "magnet:?xt=urn:btih:7eaefd1bdade92f8ca4187a3549fb97687cea134" },
+                    { name: "magnet:?xt=urn:btih:dad0f5a56da039af339459e6f96cfd98bc90c031" },
+                    { name: "magnet:?xt=urn:btih:4a4914a7cd7c77d7bccb169d688728f845c9fe92" },
+                    { name: "magnet:?xt=urn:btih:e8ad797ce108bf1b6b61e8c0740dd5cf819f5b1f" },
+                    { name: "magnet:?xt=urn:btih:a1441f92b050763b33f0b0443fd82f283c652526" },
+                    { name: "magnet:?xt=urn:btih:2e9ec106fb0fba768fd42f5b95562d390f52dfcc" },
+                    { name: "magnet:?xt=urn:btih:b6160854a2ce0584672c73079a0c63622a67ebcb" },
+                    { name: "magnet:?xt=urn:btih:f9c8bb80eb28b5538ba7fdf958886aaeef5cdd42" },
+                    { name: "magnet:?xt=urn:btih:33387053735ff416415e51461ac4dab84ff0879a" },
+                    { name: "magnet:?xt=urn:btih:78c5d36f265a78b305e08c385bd60a697d05d256" },
+                    { name: "magnet:?xt=urn:btih:9aea3b194c090e33808b0409ae6e5c8686bcdad3" },
+                    { name: "magnet:?xt=urn:btih:2c4e4bb474c021645c145ac3df2c78858c3be16f" },
+                    { name: "magnet:?xt=urn:btih:e65eb82ea6d91d53a8b5359495752e1420a389c2" }
+                ],
+                "天川空": [
+                    { name: "magnet:?xt=urn:btih:85e5c5351e99199636ab480a39146a3123ba2052" },
+                    { name: "magnet:?xt=urn:btih:3e343810051db55984b8f4a45c3a4ada390f21ad" },
+                    { name: "magnet:?xt=urn:btih:652ba6d3721d3ec34490cce2e01886824c645dbc" },
+                    { name: "magnet:?xt=urn:btih:8a3e55e0bfe3eb6451b6ee55d3e4121b413cf415" },
+                    { name: "magnet:?xt=urn:btih:bc871267180a84662af712a26d743cd3702743ac" },
+                    { name: "magnet:?xt=urn:btih:1111e845eeeba2ea2f606cd84b203f2d8a4a7e27" },
+                    { name: "magnet:?xt=urn:btih:b93bc896bda8f2cc1626adddd3723a407804630e" },
+                    { name: "magnet:?xt=urn:btih:7d9b24eb9e89e250c548a44ff34a083dfbe0e82d" },
+                    { name: "magnet:?xt=urn:btih:2f958ee27f7a80058799f56c2c558d1d524ec7ed" },
+                    { name: "magnet:?xt=urn:btih:fa1d2697e6810436556d9a96f85d906fd46d6d37" },
+                    { name: "magnet:?xt=urn:btih:beb93e0e221eacd9bcb4f9bf834f63999d0ad9aa" },
+                    { name: "magnet:?xt=urn:btih:2d5d83e9749999cc6e5b722addd90947567e0cdf" },
+                    { name: "magnet:?xt=urn:btih:ee2288ec5a18e2744e424e717ab6c43a2b3d623a" },
+                    { name: "magnet:?xt=urn:btih:562ed09447e33c07133249e96d5dbbf05d6477fe" },
+                    { name: "magnet:?xt=urn:btih:b2bf0b148c4feb81c92e69eb9c1e177b227ad974" },
+                    { name: "magnet:?xt=urn:btih:dbb2d8d4752b27fa2f8156d71a2a123b712ae65b" },
+                    { name: "magnet:?xt=urn:btih:b6452d0049e20d774e099460f83fac4ca5183550" },
+                    { name: "magnet:?xt=urn:btih:7a338f4932cd0e2fc843c4122b5cfdcf6a6f7d4c" },
+                    { name: "magnet:?xt=urn:btih:d284d0d67721728b2229be13f12f2f6546efc669" },
+                    { name: "magnet:?xt=urn:btih:ff3347ee2596c06d78b37010a7f39dd88bc7e678" },
+                    { name: "magnet:?xt=urn:btih:d2d855ed2178e68068303bc6819343f29700cdfd" },
+                    { name: "magnet:?xt=urn:btih:c4278c3dfd0f3a4407cc350b60980e99c063ba31" },
+                    { name: "magnet:?xt=urn:btih:3bf6146483e4597e7164f11b4f076da010b082d1" },
+                    { name: "magnet:?xt=urn:btih:321131b3fc065a9c00bf6bae73fa3fd21c91f2bd" },
+                    { name: "magnet:?xt=urn:btih:63d2d265f30dc1861e85e0ed5e5480e5b7f667ec" },
+                    { name: "magnet:?xt=urn:btih:db810ae424348ab905dcfbc96138fac218852529" },
+                    { name: "magnet:?xt=urn:btih:821be6d92f3804d640b9e031725ac90ab9932a59" },
+                    { name: "magnet:?xt=urn:btih:caf52c5a6c91967f13c209d0989d8dae7d754938" },
+                    { name: "magnet:?xt=urn:btih:bedadec21ffb7f52e7c162f3e0c01bf5874c8f93" },
+                    { name: "magnet:?xt=urn:btih:223f000a0dd3b94f5a784d15d83f6a2d83d306be" },
+                    { name: "magnet:?xt=urn:btih:82b5406133c6bff52b2fa6d1e6ac2edbb1a09c3f" },
+                    { name: "magnet:?xt=urn:btih:69ad5db16781c75f8a595123a1a557577be5ee1a" },
+                    { name: "magnet:?xt=urn:btih:6987c7e2da8472e50769561c62e3617100948e9f" },
+                    { name: "magnet:?xt=urn:btih:ad5b6f73b13f168614ac66c06b1c6342bbcdec2a" },
+                    { name: "magnet:?xt=urn:btih:000bf2f24d0c4d04b411b4a110d9e1c14e154866" },
+                    { name: "magnet:?xt=urn:btih:54e0e226af71e0780cd0339cbade0b61f9d1d79f" },
+                    { name: "magnet:?xt=urn:btih:a07458b25f5e99799f3f850da4c25759b048b606" },
+                    { name: "magnet:?xt=urn:btih:13d55c7aba45db9ccfb3821b453e89018ae70366" },
+                    { name: "magnet:?xt=urn:btih:25c910678b39caa0721dba5d826e85e016fd51ea" },
+                    { name: "magnet:?xt=urn:btih:727927557392f0cdf716771bc3c51b4f28bde38b" },
+                    { name: "magnet:?xt=urn:btih:d260d5141428eba4010aea0d6294727cb43c7358" },
+                    { name: "magnet:?xt=urn:btih:7636b8afce52f9b62372b0cce248a490aa291dbd" },
+                    { name: "magnet:?xt=urn:btih:4655803cc19f504368f3a45fd707cce822012108" },
+                    { name: "magnet:?xt=urn:btih:484ff633ee6cfdb0938c81d090a435f7e16601b4" },
+                    { name: "magnet:?xt=urn:btih:9db0a821e490bf8c44ca15139b71651835ea28b4" },
+                    { name: "magnet:?xt=urn:btih:f22fec7cb90574ed02f19ea4f38c7401656d5d41" },
+                    { name: "magnet:?xt=urn:btih:1c409b8baa3299fe421bfb7feec38905b6454b29" },
+                    { name: "magnet:?xt=urn:btih:fb7a692f682691b83f550ea98824b3d89f1522b4" },
+                    { name: "magnet:?xt=urn:btih:d53f044c073b3bc381f480fd4a2a1391dfacb3fc" },
+                    { name: "magnet:?xt=urn:btih:b96e76e93a475e716674e0486b12d4081d29a9fc" },
+                    { name: "magnet:?xt=urn:btih:5d8ec0e9d588d95807dba267252e820965c88f91" },
+                    { name: "magnet:?xt=urn:btih:1bfc9731acad4676118bed403f39a746e626f8c2" },
+                    { name: "magnet:?xt=urn:btih:1717534e65f679d5f379efaac76e212626b8a37d" },
+                    { name: "magnet:?xt=urn:btih:888e2f71a4f38357e6a6b5c52f29734d57465e64" },
+                    { name: "magnet:?xt=urn:btih:f2720f4a4effba13c9c07f924e294ecb36acb594" },
+                    { name: "magnet:?xt=urn:btih:6ed7ab29451e5025ab305c1b35b7eba8ebb1f482" },
+                    { name: "magnet:?xt=urn:btih:1988299bf83bb195934592d214526cc9b924c23e" }
+                ],
+                "宫下玲奈": [
+                    { name: "magnet:?xt=urn:btih:7a57701ea9a3eda28fee5250cadf61cad0422a13" },
+                    { name: "magnet:?xt=urn:btih:1b85b3bf2bc14fc1f7c6be972c146e4fe9bd4b5a" },
+                    { name: "magnet:?xt=urn:btih:0cfef56df921a17546e761ce01df1ea8ff788ca1" },
+                    { name: "magnet:?xt=urn:btih:bc4b0fca04457125712829e714f00b38aa5f471a" },
+                    { name: "magnet:?xt=urn:btih:96a1c28d8371dc49f90b83d8bb48d203c2bb2ae8" },
+                    { name: "magnet:?xt=urn:btih:731ee948907a92f04a3c42ff56a679e7da8e102b" },
+                    { name: "magnet:?xt=urn:btih:548083e79f08fcf7afe8585ce064fc86669feced" },
+                    { name: "magnet:?xt=urn:btih:e3413fb5919cf6a63aff338ac940ac55322a3faa" },
+                    { name: "magnet:?xt=urn:btih:740e0eb05247b60604df068d485e7a67f7c4b944" },
+                    { name: "magnet:?xt=urn:btih:53147a132faa6699d4564dcf58b608fa72914c75" },
+                    { name: "magnet:?xt=urn:btih:84d9306d7c2703664a9db7c92968f54560609810" },
+                    { name: "magnet:?xt=urn:btih:2fe7d95e00c846db3523612441f21f5dc34e6a31" },
+                    { name: "magnet:?xt=urn:btih:648cdbe7d86340f3305186480720cbe6ec80549e" },
+                    { name: "magnet:?xt=urn:btih:21e5a6de1a9215a84df64f233302c0e7df42ccd9" },
+                    { name: "magnet:?xt=urn:btih:85324f86360a9875fee827de1975d00aaf22b04f" },
+                    { name: "magnet:?xt=urn:btih:8060b60d6e4805897b9f2311ea2a3cbd3ba1a1d0" },
+                    { name: "magnet:?xt=urn:btih:068b215a6626a5ea70b98e144ef2bbf2bb63342b" },
+                    { name: "magnet:?xt=urn:btih:bffba589aaf7b5a8fdbc89b48aa0f315cd655a0f" },
+                    { name: "magnet:?xt=urn:btih:fbccec1c74fa4714a989b51d196ef1cf412f796d" },
+                    { name: "magnet:?xt=urn:btih:676c076a9dad83c92ab685832896d5bc93ad4d7e" },
+                    { name: "magnet:?xt=urn:btih:8c10e6ceba965fc03e3638b6fad069102a917365" },
+                    { name: "magnet:?xt=urn:btih:efbcb99cab282502e48aa44961858c4e7ddd1d1a" },
+                    { name: "magnet:?xt=urn:btih:3b2a6558d0fa9711a003a395ec2822292220669c" },
+                    { name: "magnet:?xt=urn:btih:41091cf0d04290eb8d20ffc10d545adf9ce4f37e" },
+                    { name: "magnet:?xt=urn:btih:c60a95d9ee8c00eebeed8a70ad7fc4e1c640e424" },
+                    { name: "magnet:?xt=urn:btih:82c0c36cb99fd60571b8384f78efc634fe372b16" },
+                    { name: "magnet:?xt=urn:btih:4280d80b9d38a148772cbf8c383fb03e30c5f58b" },
+                    { name: "magnet:?xt=urn:btih:56db41c95342f3a4cff61a578e8bd01401df7191" },
+                    { name: "magnet:?xt=urn:btih:95ef6ce0a71e9b54aa6693ce4a0f6d69222df58b" },
+                    { name: "magnet:?xt=urn:btih:b37ae3aa8683cf38de0bcc6c6a56cc30db4c7ae5" },
+                    { name: "magnet:?xt=urn:btih:f0c0b849587cb9cde3dd1f579a9193127b18c205" },
+                    { name: "magnet:?xt=urn:btih:e06d799a7fddb08fc76f7451a74bf0a3b75c6859" },
+                    { name: "magnet:?xt=urn:btih:b07843ac8855cbee59a6d9921f95b8fe2a428c2f" },
+                    { name: "magnet:?xt=urn:btih:75868f0ee32c872f00977b9885d022dbc34bd475" },
+                    { name: "magnet:?xt=urn:btih:4d5f0987c6a7eabcf3466edde2134955a326273c" },
+                    { name: "magnet:?xt=urn:btih:9be30066e1b1d34bd0522859694017fdbb9226d3" },
+                    { name: "magnet:?xt=urn:btih:aa8dd5f83a6a1f96f56a8de9cbac2f223a38aa96" },
+                    { name: "magnet:?xt=urn:btih:693a225cdff313caa9e2ef95ed1fa1dc4efc2c35" },
+                    { name: "magnet:?xt=urn:btih:d6ecd84c519ab324f1b1ed9e7c4915e08e4db9c3" }
+                ],
+                "小坂七香": [
+                    { name: "magnet:?xt=urn:btih:eda5af14c0914f1c788aba8e70b1dcfa5108bc0e" },
+                    { name: "magnet:?xt=urn:btih:9b3332401b3a01d3ad12be042c599caf7c4f8003" },
+                    { name: "magnet:?xt=urn:btih:1426221b8e31c9fe56d171f66af3053659d1073f" },
+                    { name: "magnet:?xt=urn:btih:d16ce4b476111d5de628267ddbdd64ce73655d2f" },
+                    { name: "magnet:?xt=urn:btih:eb105cbb22154b8fecb0b1d675adc5f17b5aa60b" },
+                    { name: "magnet:?xt=urn:btih:1b000036ff2806cb0dc0206d0ed339a86e043302" },
+                    { name: "magnet:?xt=urn:btih:1436b673f97213f314fa85c14303150d889190e7" },
+                    { name: "magnet:?xt=urn:btih:32f7fc102d3db25e4f451335ba3c29f7fa9846e3" },
+                    { name: "magnet:?xt=urn:btih:b5c45a6f96e029b9ec15e8200d3aa0812f5643c2" },
+                    { name: "magnet:?xt=urn:btih:3a4e091132de01812e19e18a7a5a4c0de670e827" },
+                    { name: "magnet:?xt=urn:btih:34ca9d62d004df3b6ae94cb7f239a62143298a66" },
+                    { name: "magnet:?xt=urn:btih:541e948a1a061b9042770757801e976764430cd4" },
+                    { name: "magnet:?xt=urn:btih:ec52393f954895f80d7dd5420f2d93c077a89def" },
+                    { name: "magnet:?xt=urn:btih:8fbdd2200ee7ca07a834c55dbc605649b4e477ba" },
+                    { name: "magnet:?xt=urn:btih:6aa657f152e429212d009b180edf669f52f205b9" },
+                    { name: "magnet:?xt=urn:btih:dd29034944c7441d647d3568aacbfbc4586f622d" }
+                ],
+                "橘日菜": [
+                    { name: "magnet:?xt=urn:btih:17eed7216762397e0f5f746919808e314389c843" },
+                    { name: "magnet:?xt=urn:btih:48d07c5caff7ce60aae831f73d396235dd3e0956" },
+                    { name: "magnet:?xt=urn:btih:07b79649dcd02bf6815ee288eeefe1ea25037322" },
+                    { name: "magnet:?xt=urn:btih:d1077c0f9ccf2391ea3aad3535dddb330f72045b" },
+                    { name: "magnet:?xt=urn:btih:a99fdaab04c243063a983f301b1668d3c02b0c27" },
+                    { name: "magnet:?xt=urn:btih:6f93645b5b24c8349731f5a7d9a893707b981a52" }
+                ],
+                "紫堂留衣": [
+                    { name: "magnet:?xt=urn:btih:6065a6b1d0cd97f498a64c9749ed93578ff25ae3" },
+                    { name: "magnet:?xt=urn:btih:fd12d545b35edb762e6b088eea4bc16c4703b3a8" },
+                    { name: "magnet:?xt=urn:btih:b4bbc7ce45f58a0a0c17ac77bde381e1f39c76fa" },
+                ],
+                "三澄宁宁": [
+                    { name: "magnet:?xt=urn:btih:85bb5b1f97bba7ac3f5e47c572170c2345398b6d" },
+                ],
+                "一心绘里香": [
+                    { name: "magnet:?xt=urn:btih:2b1365c379a77e4513ea92841096dc10cca63a3a" },
+                    { name: "magnet:?xt=urn:btih:9df7554f812321e4765d566f1fc988419c9104fa" },
+                    { name: "magnet:?xt=urn:btih:c4021b2f9a92740e00e53e3d3fbd001037cc2c2a" },
+                    { name: "magnet:?xt=urn:btih:03236e6cfd1af87192b197dc736fc8b2e48bc01f" },
+                    { name: "magnet:?xt=urn:btih:1d6cf1a8d8b9869be298af0834cf99746eccad5d" },
+                    { name: "magnet:?xt=urn:btih:2382cf6596a67e6e99340bfb4111541d355b36bf" },
+                    { name: "magnet:?xt=urn:btih:5be1024b6a9afe9962995edf3e459983e476fa64" },
+                    { name: "magnet:?xt=urn:btih:dfbc931fc99ba57453927761965ac29a1380a330" },
+                    { name: "magnet:?xt=urn:btih:5de67235acfe94ad39988eb6b877436e32f92c90" }
+                ],
+                "天使亚梦": [
+                    { name: "magnet:?xt=urn:btih:455dfa5dda312a2940f7bb82784378f79c2b11d6" },
+                    { name: "magnet:?xt=urn:btih:e6f61c38cfb765a49a7d9a2a53632caaf36e19f4" },
+                    { name: "magnet:?xt=urn:btih:df046abb6571324a6ac74e731224a0fdb378c3fa" }
+                ],
+                "枫富爱": [
+                    { name: "magnet:?xt=urn:btih:ce2440f8f59288052a521043947a6167e412d174" },
+                    { name: "magnet:?xt=urn:btih:39808cddee98ff776b123cad3952b3f9c71251e8" },
+                    { name: "magnet:?xt=urn:btih:e4f01991cc639a49d3e69178eacb1a0db6da51cb" },
+                    { name: "magnet:?xt=urn:btih:b888013c7e1b00765e5bca4d5ed255abd6081e25" },
+                    { name: "magnet:?xt=urn:btih:4b23995823fb4f8e1edd98234e5c1353040e4fca" },
+                    { name: "magnet:?xt=urn:btih:3c334d53fb47b41c6a9d6d43f596ac53d5c8ce93" },
+                    { name: "magnet:?xt=urn:btih:b7e311620f3bb43d46e6edd7a6afd0244ea01043" },
+                    { name: "magnet:?xt=urn:btih:1287eb3e5014f259f467cef55b8c4b62f4748d40" },
+                    { name: "magnet:?xt=urn:btih:43acd23ecfc6eb680f20c3c88f344bb9b08aaef1" },
+                    { name: "magnet:?xt=urn:btih:3f832c9660359426627fb358fdb4d5dde9512791" },
+                    { name: "magnet:?xt=urn:btih:636ce3cfe10b23e31b2ea4f225c8ac2d97cab677" },
+                    { name: "magnet:?xt=urn:btih:4f86f22cb2e3aae58164c24562e165c30e696dcd" },
+                    { name: "magnet:?xt=urn:btih:8605df74717950ea9bfe3b51d37bb6b57004c5b7" },
+                    { name: "magnet:?xt=urn:btih:11144e3d7277ce61a04118227ce5663462677022" },
+                    { name: "magnet:?xt=urn:btih:b438c11e3bd93fb401441d4f0c6880c14aea681d" },
+                    { name: "magnet:?xt=urn:btih:e0acc0dd02a5e6d063df6616055a4907eb2cfc31" },
+                    { name: "magnet:?xt=urn:btih:5f823a9f46633f85ddfca947b4094ab54130af79" },
+                    { name: "magnet:?xt=urn:btih:60549e785ca0e36cc92f3706926b48ad09204745" },
+                    { name: "magnet:?xt=urn:btih:f379d844ada6417f73de27817e114440dcec8395" },
+                    { name: "magnet:?xt=urn:btih:a44c02b13f4bfad1a99b74bb84e43264d0e9307e" },
+                    { name: "magnet:?xt=urn:btih:0dcbf2586a93b7c3053783399cbd0fa43892af42" },
+                    { name: "magnet:?xt=urn:btih:5a9a46327c75d3bced45b2a688b88bd0c2f6e7f2" },
+                    { name: "magnet:?xt=urn:btih:074c76dd83009ff5f14a3bfcb72299ad3ba7cb6d" },
+                    { name: "magnet:?xt=urn:btih:3df1be30e2416b6b1226794682448aaf5449f494" },
+                    { name: "magnet:?xt=urn:btih:1c5cbe6969d8a0f9be5ff5d99198aef09aa4653d" },
+                    { name: "magnet:?xt=urn:btih:67f15e452049a158beabe76a9dfab50444b050d6" },
+                    { name: "magnet:?xt=urn:btih:c9fe0852af145d66a46c8f5bcdf3ebe07e40abb1" },
+                    { name: "magnet:?xt=urn:btih:1499b33b3631931ef3fb368b98d9e0c049be04e4" },
+                    { name: "magnet:?xt=urn:btih:03f4abd5086c157f227342725ef774bb3b2a3b53" },
+                    { name: "magnet:?xt=urn:btih:2a2b8e3710e9ae980b969bb484f92b20bd437c1e" },
+                    { name: "magnet:?xt=urn:btih:095601a84af379e065938e7896b7928f0cea1bcb" },
+                    { name: "magnet:?xt=urn:btih:e1525f09a12b4ce0b4efc40af07db55edc971fcc" },
+                    { name: "magnet:?xt=urn:btih:34cdc9c0c65dee34a13003bae6bcc0690fab4ea9" },
+                    { name: "magnet:?xt=urn:btih:a0f818d21d983d73b15aeeadc6572088083b3a7a" },
+                    { name: "magnet:?xt=urn:btih:dc650f0ad3e8e978b24633496618225685c160c8" },
+                    { name: "magnet:?xt=urn:btih:ca46cc467e38b098babc9f914a247eab98feb261" },
+                    { name: "magnet:?xt=urn:btih:431c5de692b331531a6d1996836fdd416b9c8ec7" },
+                    { name: "magnet:?xt=urn:btih:fb0ee4a72940a095eb0b20078a24e4a516eb01da" },
+                    { name: "magnet:?xt=urn:btih:a34627a3f647c5993ad51784c111452b58f60fe3" },
+                    { name: "magnet:?xt=urn:btih:764a5ec49c5690befc38bc842630c8f5a7652d20" },
+                    { name: "magnet:?xt=urn:btih:876ff079210679d2de50cf9c7835ab1901734807" },
+                    { name: "magnet:?xt=urn:btih:750b7946b6099894b06ff5fbc82091549fce6bef" },
+                    { name: "magnet:?xt=urn:btih:a4a1a3b0cf57f9bc7ea9e722bee27bb5d31a97f8" }
+                ],
+                "凉森玲梦": [
+                    { name: "magnet:?xt=urn:btih:db4fbb971399531a6131bfa3eb33f1fca0de60fc" },
+                    { name: "magnet:?xt=urn:btih:7bfcd6f5c835ecc903891def9e0cb14e08553545" },
+                    { name: "magnet:?xt=urn:btih:c430cf2e9ca16929e2a8534d46b79c0f8c482b83" },
+                    { name: "magnet:?xt=urn:btih:8b8a789808c6aac7978adaae734c5d373f9c9ea9" },
+                    { name: "magnet:?xt=urn:btih:ccf108d8d9af769c936e5081853a96b7a5ea5f34" },
+                    { name: "magnet:?xt=urn:btih:ffa47d89b4ed9cc4098f01c5135464eb6ad3aae1" },
+                    { name: "magnet:?xt=urn:btih:00a3639632efa944164fd1802419768ba7b8f404" },
+                    { name: "magnet:?xt=urn:btih:46f430e07e73e4d65c8edcea0134f8318daa1388" },
+                    { name: "magnet:?xt=urn:btih:21799d5b7f6f9aaad2915cb5a64967eb406ab397" },
+                    { name: "magnet:?xt=urn:btih:6272cb4186ced6ca8fa87f8a031e65865e4995a7" },
+                    { name: "magnet:?xt=urn:btih:bda4838b2dc912ad74e510d2a9b32b773adedf5a" },
+                    { name: "magnet:?xt=urn:btih:a11376a0da059a531f8683531f2ba6cc557b350b" },
+                    { name: "magnet:?xt=urn:btih:9790cc3349aa68e6c8bd331ad2620f22cea5ed98" },
+                    { name: "magnet:?xt=urn:btih:983b746b40a10d02de0492ae8455449f782b8ac6" },
+                    { name: "magnet:?xt=urn:btih:66ec120398e8990968a3b624ab06fd609709a44a" },
+                    { name: "magnet:?xt=urn:btih:642f9b034ea1208f20f2595ff85784ef204cf89e" },
+                    { name: "magnet:?xt=urn:btih:b71d28a264646aae860b35302035e77bbde553f3" },
+                    { name: "magnet:?xt=urn:btih:b7bac214ac7307ffbc7f669d0f0167cfc6cf25f8" },
+                    { name: "magnet:?xt=urn:btih:c3f09bf9adab13efb9bd3bae0e53d446406a4202" },
+                    { name: "magnet:?xt=urn:btih:f2e85dfbaad739d60cd431b88ac0be9f45a77cae" },
+                    { name: "magnet:?xt=urn:btih:d03191bb138225cb8ea2365a14428f1628e6bc91" },
+                    { name: "magnet:?xt=urn:btih:bac4df44c1f5e67c3494cfe891f33b7cf956a754" },
+                    { name: "magnet:?xt=urn:btih:993d0d1851e865f4e66af7ef5274bc25fb6190cc" },
+                    { name: "magnet:?xt=urn:btih:051bcaf32498b3aae464ecde4a7baab7015a8bf4" },
+                    { name: "magnet:?xt=urn:btih:3b38fe0a0a6d95ad3decb6df90b78a88ca7a9ee5" },
+                    { name: "magnet:?xt=urn:btih:982018ee655d3afcd2a42e1299b6448e837bd2c8" },
+                    { name: "magnet:?xt=urn:btih:2465e92dcb72bbdaed856356fe2e5502d4333258" },
+                    { name: "magnet:?xt=urn:btih:d8ec496b611e1667ff6146bbdc1d80aab7f417b9" },
+                    { name: "magnet:?xt=urn:btih:f884a0b7675434d1146a43d5c0349fdc273ce9d8" },
+                    { name: "magnet:?xt=urn:btih:bae9d3ceab4d0d2d3663ae5567007a354a26ad33" },
+                    { name: "magnet:?xt=urn:btih:6c407febe9492cdd213e9ff5d06123f5c617b98b" },
+                    { name: "magnet:?xt=urn:btih:cae1a2a86f1daa7c3b37395d950789f541e27463" },
+                    { name: "magnet:?xt=urn:btih:265f72121480c1b25daea729a10fa408ade4b9a9" },
+                    { name: "magnet:?xt=urn:btih:a1d0ac5fc77281f7883876e929828aee60394b11" },
+                    { name: "magnet:?xt=urn:btih:68b7b1939ce68df588b47c9829a66f1f7e953419" },
+                    { name: "magnet:?xt=urn:btih:2573f062b6c642bb167ffa2b1452928b556b6583" },
+                    { name: "magnet:?xt=urn:btih:dff321b775e1ab42f890c87b0186147454c997b9" },
+                    { name: "magnet:?xt=urn:btih:8c0ebfd34c20dc0b631595281d61a4bcbf011774" },
+                    { name: "magnet:?xt=urn:btih:1bad753bb09ee0b78e41383266a8a5902cd3b70a" },
+                    { name: "magnet:?xt=urn:btih:e4791143ccdfb06b1191956abb63a2c6dface7d6" },
+                    { name: "magnet:?xt=urn:btih:6495c817de1062102c6c1d1c30a37e0f346c6958" },
+                    { name: "magnet:?xt=urn:btih:d99eba73161e6287b35371bb041b1b7d62cc3c8c" },
+                    { name: "magnet:?xt=urn:btih:d583d6b81ea3dd1784739ab96d28fb579d743fd1" },
+                    { name: "magnet:?xt=urn:btih:c44d89182ef27a4f0618088831e8bb7827de02fb" },
+                    { name: "magnet:?xt=urn:btih:ae7f1076d018e6751e8a0203fe1e23ceade92db5" },
+                    { name: "magnet:?xt=urn:btih:b78f9a0a443a58b6e91dea6de819c359f45bdde8" },
+                    { name: "magnet:?xt=urn:btih:49c84adee2cd17cdda0b14e4ff3503aab3c97b1e" },
+                    { name: "magnet:?xt=urn:btih:a18a862433441d0d862311315bcc7faa2f7412cf" },
+                    { name: "magnet:?xt=urn:btih:01925f4b02614046215be1c854c532db8ed40039" },
+                    { name: "magnet:?xt=urn:btih:71d6e4796d44c30173783a3b049b127f32d66b5c" },
+                    { name: "magnet:?xt=urn:btih:c58a84c334143e7e5ff715b684664a689a0dd1a5" },
+                    { name: "magnet:?xt=urn:btih:5cab38299b34a067988be4440201b41c3ea28d08" },
+                    { name: "magnet:?xt=urn:btih:1d2d446aab286ada6b289c986e8c5a8f887ddf62" },
+                    { name: "magnet:?xt=urn:btih:ae60991ce694163abbb0b9d7f1b102bbd2739f8b" },
+                    { name: "magnet:?xt=urn:btih:d37419e256164595ee21bab60730b0534a9ccffb" },
+                    { name: "magnet:?xt=urn:btih:76e92e8dd1d0f9a2e9cfb22347aaf38e6d127ac2" },
+                    { name: "magnet:?xt=urn:btih:6a9cc36845fe37402988281ba98d2a7442c23ae0" },
+                    { name: "magnet:?xt=urn:btih:a659451f721737fe4c9ac08e8bb43eb27f556023" },
+                    { name: "magnet:?xt=urn:btih:8d0f493480863e23f2f9251d8c7d70d09695d413" }
+                ],
+                "泷本雫叶": [
+                    { name: "magnet:?xt=urn:btih:c0bb6ea789e25d11f0b1fae1ffa1f8fe7ca5456c" },
+                    { name: "magnet:?xt=urn:btih:5b5890172b858360146157f9f8fd3b28fc4759dc" },
+                    { name: "magnet:?xt=urn:btih:81766d7d0e17ce064b57ea04f32046cf899d8a49" },
+                    { name: "magnet:?xt=urn:btih:069b6160684c8de9e002a7fb4817510e0e5a872b" },
+                    { name: "magnet:?xt=urn:btih:013449e6e0cd708c8ff3504279dd3db30b5a66ba" },
+                    { name: "magnet:?xt=urn:btih:68097efb552c16365944fb18398799ea7953282b" },
+                    { name: "magnet:?xt=urn:btih:edcfcfdf8e97bd6881036bad77abf383133053dc" },
+                    { name: "magnet:?xt=urn:btih:6464bd3a68d538b05fb397f889a96de7e03686ed" },
+                    { name: "magnet:?xt=urn:btih:9441468e53493a5fe5fc7a12862bbe5e0c357b37" },
+                    { name: "magnet:?xt=urn:btih:38f3442d3923ce2a98dde56be7f70be67e914daa" },
+                    { name: "magnet:?xt=urn:btih:29a5bc941cf625625cd3c43209128b0cf247770d" },
+                    { name: "magnet:?xt=urn:btih:72403e521a1de38f26418328c279559e525f1751" },
+                    { name: "magnet:?xt=urn:btih:e5b6d2907b25e8422233f43dfad6fc132f396870" },
+                    { name: "magnet:?xt=urn:btih:314061110c078fa769c502ffa2b3c73c29028945" },
+                    { name: "magnet:?xt=urn:btih:7c38e8af584e9c8dce8f463c92a360746a14bbd5" },
+                    { name: "magnet:?xt=urn:btih:538a89d0f3486d1ea0c213985b0f97cd282ec618" },
+                    { name: "magnet:?xt=urn:btih:df5463b6b9f847d6f89be7c4f5429b5b187f58e7" },
+                    { name: "magnet:?xt=urn:btih:1343042065d7102e3f8f19f07b2acc935d01ce77" }
+                ],
+                "爱弓凉": [
+                    { name: "magnet:?xt=urn:btih:36085e14bd4aa9206a4d32bf97122610961017d6" },
+                    { name: "magnet:?xt=urn:btih:aae6206abb01ff2dc656b699afa77f1ce581ed4b" },
+                    { name: "magnet:?xt=urn:btih:ce3016d636b94fefd1860e47a6b925235f665362" },
+                    { name: "magnet:?xt=urn:btih:108d9c9f400cff5d4fef0f90dd08f2a17d56abf4" },
+                    { name: "magnet:?xt=urn:btih:772e7167bbee404249a3f28a50be05fb8a71ae8e" },
+                    { name: "magnet:?xt=urn:btih:92187e85c2f5b8c73b5c615511cac4f68e74aed0" },
+                    { name: "magnet:?xt=urn:btih:49f6c301fe0aba0002bda2eca12d0b9fc18ead8c" },
+                    { name: "magnet:?xt=urn:btih:48161b0aaf14265295cbd6c283febe2e81fd991b" },
+                    { name: "magnet:?xt=urn:btih:3738eaeb05b2c4c4e520d6a6e1fc3eaba4792a39" }
+                ],
+                "枫花恋": [
+                    { name: "magnet:?xt=urn:btih:12929553b60c09e4e4c97e93e6e0bcad92d0d379" },
+                    { name: "magnet:?xt=urn:btih:e1da6c1182354ae2f176136913f3a0a8b6cc1cb3" },
+                    { name: "magnet:?xt=urn:btih:eeab8b8d63c108fcf7650d778d0495c742fb807a" },
+                    { name: "magnet:?xt=urn:btih:12929553b60c09e4e4c97e93e6e0bcad92d0d379" },
+                    { name: "magnet:?xt=urn:btih:c72a132c9b6aeecc540b958dbe5616f2263cbe96" },
+                    { name: "magnet:?xt=urn:btih:04a6097aac2664660424a1937e5eefbc837f6cc6" },
+                    { name: "magnet:?xt=urn:btih:9d1c3b2b6844aa3d391c04182ba5bc458afdd4f5" },
+                    { name: "magnet:?xt=urn:btih:597cd8b870cd86ce4b86dd6b9539fbb1c3bd1870" },
+                    { name: "magnet:?xt=urn:btih:7ccfe48212a4cbfa1b1a6792ad2e4b387a686aff" },
+                    { name: "magnet:?xt=urn:btih:3759f11346e7b844fb767eb44477596615932f41" },
+                    { name: "magnet:?xt=urn:btih:8c9032e4d06d09103e69d8e1746a28a16bca473c" },
+                    { name: "magnet:?xt=urn:btih:fcbfbf608c5c44394bdfa66e425ad6139919374e" },
+                    { name: "magnet:?xt=urn:btih:7c75cfb600702cc6feb80c5c0d680f8b8405c598" },
+                    { name: "magnet:?xt=urn:btih:5a4b87926a5051c67a4c4579f040cd8b940e813b" },
+                    { name: "magnet:?xt=urn:btih:6618931a81562e162d8e8e4a8a57968ec47dd4dd" },
+                    { name: "magnet:?xt=urn:btih:2f4ea8a49a62f5ec1fe9961814a72e8c0a63afaa" },
+                    { name: "magnet:?xt=urn:btih:f18875efc816b373225c08a5a65f60c7c6848b91" },
+                    { name: "magnet:?xt=urn:btih:42aa88b93ae12970a1ec0e2c272dcf8e3cdafc9a" },
+                    { name: "magnet:?xt=urn:btih:129a1abd3e87a0cff8b90c93a704b71dfc6a66ec" },
+                    { name: "magnet:?xt=urn:btih:256ccd437047337b8b3870bb8954938aa487d500" },
+                    { name: "magnet:?xt=urn:btih:9521641fcae41dfb542076a93085fa3dd97c7a2d" },
+                    { name: "magnet:?xt=urn:btih:0d1617f63e2b60c6eada869022880409e90a2b82" },
+                    { name: "magnet:?xt=urn:btih:53bae30403d4b6ae509de5325bdd77df8aaa6ee3" },
+                    { name: "magnet:?xt=urn:btih:ae727918d4fca00772eb7e686a1bc02dcaddd191" },
+                    { name: "magnet:?xt=urn:btih:aefabb3766529e22bdb8f4de93ea4562495781a4" },
+                    { name: "magnet:?xt=urn:btih:21fd162c617fb307a62f8a7800e132869abe9a8f" },
+                    { name: "magnet:?xt=urn:btih:0c945feb074cca2091c6738d11c2db039481d4a8" },
+                    { name: "magnet:?xt=urn:btih:084179cd1dc9a8da68996593be54167f47cc6889" },
+                    { name: "magnet:?xt=urn:btih:b75a65f083ce6ae6b896327a0b08677bd75e92cf" },
+                    { name: "magnet:?xt=urn:btih:204feb57484e13660637ed268b772d5e490cdb4e" },
+                    { name: "magnet:?xt=urn:btih:6e2aa197177c94eb11ffcd2d7a4f2491293c2984" },
+                    { name: "magnet:?xt=urn:btih:c9d53cc13ee372b1a2d627dcd1ddba5770e6d443" },
+                    { name: "magnet:?xt=urn:btih:01da922196bb8195375cadf29154e00f458d4613" },
+                    { name: "magnet:?xt=urn:btih:7efabeaabf0a8d924dd77623c6783014dba6e4cd" },
+                    { name: "magnet:?xt=urn:btih:adc4493f1737b989afd28e2b992595fcbf823bc8" },
+                    { name: "magnet:?xt=urn:btih:d7b9aab83bb439adf8532ba528095d5b93fc3b66" },
+                    { name: "magnet:?xt=urn:btih:a393f1e8cc3ddc38bed8c3dfe030598822cb567b" },
+                    { name: "magnet:?xt=urn:btih:cdbfd5642de56d18a75802e0f25cb5bc71012fc9" },
+                    { name: "magnet:?xt=urn:btih:58641cc03fc1d21e524c4b60b55e90f304d57780" },
+                    { name: "magnet:?xt=urn:btih:b734e319e96d6e721650c206a066b0a3148d67e0" },
+                    { name: "magnet:?xt=urn:btih:d8f2bcd1cc43237b6d9b6277bfefc6b69175d708" },
+                    { name: "magnet:?xt=urn:btih:9b94e3e85a55e0f14912166a141d4e837f93d960" },
+                    { name: "magnet:?xt=urn:btih:569fb7956bb93309250431451883644c0bc044e6" },
+                    { name: "magnet:?xt=urn:btih:80b7fe3ba4a1e76959929d90ec71a00267881975" },
+                    { name: "magnet:?xt=urn:btih:22be550090145bb91248f26e52406aa5bd1efcab" },
+                    { name: "magnet:?xt=urn:btih:7513cb39111f8b25f9d9f1e4a704e28ee7616017" },
+                    { name: "magnet:?xt=urn:btih:71632144faa2548e51e15b6c514d3d7d396e6d43" },
+                    { name: "magnet:?xt=urn:btih:508e3e214e40689fef92dbc09b6215f9d02f2f20" }
+                ],
+                "高桥圣子": [
+                    { name: "magnet:?xt=urn:btih:ec4b922ffd4abd0bba15bf30e52b8c91060b3500" },
+                    { name: "magnet:?xt=urn:btih:23b06f254fd317746273094d178e9212c444df9c" },
+                    { name: "magnet:?xt=urn:btih:a0779022a743eb1ff1c3eea917dc6baa9c07beb5" },
+                    { name: "magnet:?xt=urn:btih:57cb1c4b98f9d5dbc2ab68b86c0389a3fa1c3f81" },
+                    { name: "magnet:?xt=urn:btih:059c166181d04eedc3b31a04f420471272cbeafc" },
+                    { name: "magnet:?xt=urn:btih:0a323754f4150d5d087eff84362729d8e7ed5dda" },
+                    { name: "magnet:?xt=urn:btih:8b1c42945c97257de6d564efee741d50970b7f55" },
+                    { name: "magnet:?xt=urn:btih:7b7a49dbac447da5318078f2fc7d7f90a730cd41" },
+                    { name: "magnet:?xt=urn:btih:5bb74a1e23e6a567b2cb357dd4d3f196587be134" },
+                    { name: "magnet:?xt=urn:btih:b768a1e4df7b5533bbbd87773ec5e5de146b0a80" },
+                    { name: "magnet:?xt=urn:btih:26f08c338a0af0de129595c1eda58c7b74ae10e0" },
+                    { name: "magnet:?xt=urn:btih:c00049b13e097d888b47e9df761c0536c75d3cfa" },
+                    { name: "magnet:?xt=urn:btih:1923302e6e9bd95b1aed68a22ea9980bd1cdf7b1" },
+                    { name: "magnet:?xt=urn:btih:6808c6b334875f1ab41087ea91ab2c6f66bcbf0f" },
+                    { name: "magnet:?xt=urn:btih:eee482b589e4f2f12bce4bd56f5c8eae6912006d" },
+                    { name: "magnet:?xt=urn:btih:3795f12b3adb538190f500394727b2c894fd3c90" },
+                    { name: "magnet:?xt=urn:btih:d6294335b559de1d9514e2eb244a03edb2515704" },
+                    { name: "magnet:?xt=urn:btih:98232919fc5935011188c4ae25535d5f05962549" },
+                    { name: "magnet:?xt=urn:btih:71dc6c165e044be55ab9098ee4b626aa1d20ea1e" },
+                    { name: "magnet:?xt=urn:btih:fb5e05c36d4150d301efbf44d71b1d62c21ea4f5" },
+                    { name: "magnet:?xt=urn:btih:2777fea41783de2c6a472a06f9a2e11604763b3f" },
+                    { name: "magnet:?xt=urn:btih:5fbd4704e050924d5ba6bece09cd79b8d3604331" },
+                    { name: "magnet:?xt=urn:btih:80543319bfaeb139c272c664cd0c349cbb8a6b95" }
+                ],
+                "河北彩花": [
+                    { name: "magnet:?xt=urn:btih:d65bbef7a525ec4a236ffbe7ca7cec90cf35acf6" },
+                    { name: "magnet:?xt=urn:btih:3cfcdf9e4fdc6c3e1bd85ce44347835976333bd9" },
+                    { name: "magnet:?xt=urn:btih:d7432c675a5f889f6f97b8bb9de5d3523625e5a2" },
+                    { name: "magnet:?xt=urn:btih:b2274dcac5f2d360aab2689046b8b281e5fd57c1" },
+                    { name: "magnet:?xt=urn:btih:73c22bfe02c7825c3d9be4dee1ecff2faf29ddbd" },
+                    { name: "magnet:?xt=urn:btih:47d6fc1dc354103faeb18421407dc0c3feef8be4" },
+                    { name: "magnet:?xt=urn:btih:9b414966009213430a0566a3eb8f68e01035ab87" },
+                    { name: "magnet:?xt=urn:btih:f6f04fd0892f7f4dc4b8dfea3b6f2b6690bf9925" },
+                    { name: "magnet:?xt=urn:btih:e16834571ea040bed162f9cb410d85e00ed1cadb" },
+                    { name: "magnet:?xt=urn:btih:3cf95ce71d50219bd6f11ea69ea773a3c91aca53" },
+                    { name: "magnet:?xt=urn:btih:41a8a057bcdc309ccad89c8a650b57c9786769d7" },
+                    { name: "magnet:?xt=urn:btih:8b7f399f1d191521371ae89d46205155550fe281" },
+                    { name: "magnet:?xt=urn:btih:f8a76c80d19406fe5a09d4f8d939f5d12917d0b9" },
+                    { name: "magnet:?xt=urn:btih:8302ebbab5798430076c282859383aa261234e1b" },
+                    { name: "magnet:?xt=urn:btih:dce3220f5aec277386160c9e2e2ff046cd0394f3" },
+                    { name: "magnet:?xt=urn:btih:f78474b0c74ab14e931df2bdc0f6d8c11f76f9de" },
+                    { name: "magnet:?xt=urn:btih:353a7d7ea0fefbacd22ab4522e0cbfd7965207cd" },
+                    { name: "magnet:?xt=urn:btih:2d8339786d49165d984e717a431e1563e7d14646" },
+                    { name: "magnet:?xt=urn:btih:23cdb976838d2a44955f92b66617df72b86ad01b" },
+                    { name: "magnet:?xt=urn:btih:44a66e071013a3a3dc375b9a41446e597f521cb5" },
+                    { name: "magnet:?xt=urn:btih:0444672685d56198b7c71cadac6e83811555aa5c" },
+                    { name: "magnet:?xt=urn:btih:8d9fe2171c08639190f1f2ae072dd064acb03dde" },
+                    { name: "magnet:?xt=urn:btih:f3f41ed19144759cac0fa8cecf3351ea03f08792" },
+                    { name: "magnet:?xt=urn:btih:8d7a9abe60d41708f7d7ee0f3b2b66faa1df90eb" },
+                    { name: "magnet:?xt=urn:btih:8302ebbab5798430076c282859383aa261234e1b" },
+                    { name: "magnet:?xt=urn:btih:1e0e23ad6495548ddb8e2d2e716fa5e7399ac53c" },
+                    { name: "magnet:?xt=urn:btih:be52d09f32f3c9fe14c0d464c5e81d63c4bf03ec" },
+                    { name: "magnet:?xt=urn:btih:d5926c9530e965b00b8a7767b9e36d79a9e70294" },
+                    { name: "magnet:?xt=urn:btih:e5a4e1e420eff581edd610a32ed88142f06a5b6c" },
+                    { name: "magnet:?xt=urn:btih:a812ffde71329344937253c049032efb7452a50b" },
+                    { name: "magnet:?xt=urn:btih:c6549d1de9568288c6b904bd88f77e37ddcad243" },
+                    { name: "magnet:?xt=urn:btih:7b429a279a09085e043510cb02c10fc7eba54c1a" },
+                    { name: "magnet:?xt=urn:btih:ff309073206c3dc087d1baa26690844e1d1ba8c6" },
+                    { name: "magnet:?xt=urn:btih:46b94317f515acccc23ebf86a25628242f2bd5e3" },
+                    { name: "magnet:?xt=urn:btih:d28750551333445d244a2c334f4b2f5b37fd6523" },
+                    { name: "magnet:?xt=urn:btih:9e9e3b8e52a86f184f396867c611524fa51290f4" },
+                    { name: "magnet:?xt=urn:btih:5f4d6ebbbfed7638ee62e8039a275574f0e3761d" },
+                    { name: "magnet:?xt=urn:btih:b688037c6d3371e8512e96133aa8d13699e58d80" },
+                    { name: "magnet:?xt=urn:btih:010c381eeda4cc5aed495b3d7f5cd8b175f1066a" },
+                    { name: "magnet:?xt=urn:btih:2ad290573ceaa175a2ca096d707a0e24a2107b89" },
+                    { name: "magnet:?xt=urn:btih:9f9a9e833ab62fe7686f2f9c1425a4a17532f359" },
+                    { name: "magnet:?xt=urn:btih:918a7ae33a1faa7e8bf51e7e9dfc01ea73c47a56" },
+                    { name: "magnet:?xt=urn:btih:e552c7225a8dda45e280a7b4a3f339b241a86cb5" },
+                    { name: "magnet:?xt=urn:btih:0e06b031d0e2fde515250764e8e3219f5c965a73" },
+                    { name: "magnet:?xt=urn:btih:f687cbba5a4fbdd38d6d918c42216884068bbc0d" },
+                    { name: "magnet:?xt=urn:btih:899ca31f81c92ed608cdaa97ea53987d3a135b34" },
+                    { name: "magnet:?xt=urn:btih:d7bc98e06314a7fa14bbae0c176962bbc14b6051" }
+                ],
+                "葵司": [
+                    { name: "magnet:?xt=urn:btih:f601c2193aecd9d4263e27e5101d1a49a1d83ae0" },
+                    { name: "magnet:?xt=urn:btih:255e2620b159b538535aa947527ef37cdfdd436a" },
+                    { name: "magnet:?xt=urn:btih:fa20401282d8beb2bf2e1b60ab5a63a0fdabe911" },
+                    { name: "magnet:?xt=urn:btih:633bbd88c53a81b9cd60cf16ce1297e1f3ffe37e" },
+                    { name: "magnet:?xt=urn:btih:c86ee76d3a67da8747778dc5a2550bdb910bc2d9" },
+                    { name: "magnet:?xt=urn:btih:6c60bd52559b1aca86af7299ff884b5d395d435d" },
+                    { name: "magnet:?xt=urn:btih:bfdb4bd9617feffe164393f81902d985198f3718" },
+                    { name: "magnet:?xt=urn:btih:280a46e321413952ae0a6906e9fbbaaec75d0950" },
+                    { name: "magnet:?xt=urn:btih:8892484a980c7ab23fdf72ae84e0ec78efc6fffd" },
+                    { name: "magnet:?xt=urn:btih:975203b796f819c29be134cf4490f0b86fa61149" }
+                ],
+                "葵伊吹": [
+                    { name: "magnet:?xt=urn:btih:4e7b65b17b16b9307fb86ad006aa3a55a10b61dc" },
+                    { name: "magnet:?xt=urn:btih:f0ad915a4b9f2f5667f11fa9dbf728d2b4fc4e1d" },
+                    { name: "magnet:?xt=urn:btih:3078e4b9194f753854a65c3f2fdd15f0b9eedce8" },
+                    { name: "magnet:?xt=urn:btih:be9f9bd8659336c38ee79b4f5b95866611b95306" },
+                    { name: "magnet:?xt=urn:btih:e78d0f9da3ba7179d23deecc2a374c6d4ba182f5" },
+                    { name: "magnet:?xt=urn:btih:91c0e2ca920471074fc0bf9765b4b79e64bb8d01" },
+                    { name: "magnet:?xt=urn:btih:27070e7cf8591d80c76d5ca74db104759fb2eb3f" },
+                    { name: "magnet:?xt=urn:btih:b1b6ac14d4d85ad93bc384f7a73f4a1130261c05" },
+                    { name: "magnet:?xt=urn:btih:9b1e51512f5afc276a3acda1d5047d294284ebee" },
+                    { name: "magnet:?xt=urn:btih:e68e6b33e6bd3c97f5338a230ffc1551dea85299" },
+                    { name: "magnet:?xt=urn:btih:d9546d4d6e5a7d7fe9c4b481fee51b91003a179a" },
+                    { name: "magnet:?xt=urn:btih:82dcd05e6a8b29d0f2bc1f4c24cbc4037c0041f7" },
+                    { name: "magnet:?xt=urn:btih:8c969242fc6b826b9e1ab126b49d2ae2059fa76a" },
+                    { name: "magnet:?xt=urn:btih:61eca4c765035728b28572c3eea97fc6dc58cd91" },
+                    { name: "magnet:?xt=urn:btih:87dcf6c75b4220820f5e2a9ac1c4bb8b0bf1b67f" },
+                    { name: "magnet:?xt=urn:btih:f726642752ea65d51afe845d8e40101c70a876bd" },
+                    { name: "magnet:?xt=urn:btih:88ee62b1c5926c8d49e94424b48b477e2447b942" },
+                    { name: "magnet:?xt=urn:btih:e75be5e7a50e482ad6c2e0802dbcda04cc38c30e" },
+                    { name: "magnet:?xt=urn:btih:4136ae6090876f719f900a0d8e8c2d9387e963fa" },
+                    { name: "magnet:?xt=urn:btih:5e39a1b7f462f38351fc3b558c78c5a72902d17d" },
+                    { name: "magnet:?xt=urn:btih:a1736b70372adfaa7c1f2942328b21a92f22296b" },
+                    { name: "magnet:?xt=urn:btih:7b10654a9b0d4ee194db727eec94548dfad56db4" },
+                    { name: "magnet:?xt=urn:btih:65a6642fc0ed6e889f3f522b6e531ecf90a6eda9" },
+                    { name: "magnet:?xt=urn:btih:a16297d1d1910500537efe0fd83fd606c2c0de98" },
+                    { name: "magnet:?xt=urn:btih:e680a578bb0f9cefb909e9c63b00a162562ead38" },
+                    { name: "magnet:?xt=urn:btih:fef68b0cb2e56af94d8e429526cbbc7f477ca34e" },
+                    { name: "magnet:?xt=urn:btih:abd874bd5bf5efd58d91bea158696da420752257" },
+                    { name: "magnet:?xt=urn:btih:f00c8177251ecf1c121f41887bb63c470e9d25ca" },
+                    { name: "magnet:?xt=urn:btih:32309e0e923e9436d93565e9c360cb0aa19975b2" },
+                    { name: "magnet:?xt=urn:btih:8a29da0e40d158ae720b3609396d7d8b1165efea" },
+                    { name: "magnet:?xt=urn:btih:de9ef13c9709d2f1f811ff285f0cc8a932e0402c" },
+                    { name: "magnet:?xt=urn:btih:ff0f89c6a56336fcadc44a5edd08e5348f41c2ec" },
+                    { name: "magnet:?xt=urn:btih:96c7edea4c1fdc1f90a2b3a3ff814357ff54b4fb" },
+                    { name: "magnet:?xt=urn:btih:98b9252481ab6c633354209e64caf96b28283f5f" },
+                    { name: "magnet:?xt=urn:btih:9faab2d27da4b53f8fe090e40156bbff038b2c98" },
+                    { name: "magnet:?xt=urn:btih:6ffb2388a67e258f827ba3c4fc4b15efc1bd1ffd" },
+                    { name: "magnet:?xt=urn:btih:b937c11cd731ee2c40e14b8edde87117558d73af" },
+                    { name: "magnet:?xt=urn:btih:17233ab1c60cc74a719b093da349ce6a7dc78302" },
+                    { name: "magnet:?xt=urn:btih:793edb261cf555f9efef183e2f32ff167981c944" }
+                ],
+                "濑户环奈": [
+                    { name: "magnet:?xt=urn:btih:ae42ced78df8c7be64540fe5f1203d7b4f0c69bf" },
+                    { name: "magnet:?xt=urn:btih:e14f912c7ff7d690b4bb69fa5c893bfe1f6a2acf" },
+                    { name: "magnet:?xt=urn:btih:4463ef2b04479950872e0d6586fd26872fc3ddcf" },
+                    { name: "magnet:?xt=urn:btih:b215162251481064cf4b65b8017a0e9f9d9549af" },
+                    { name: "magnet:?xt=urn:btih:4c84283b8abc17d02ba2bdf3884d315c0a53b2be" },
+                    { name: "magnet:?xt=urn:btih:81a0098c69e0b5837f715644a0e352680828e7cc" },
+                    { name: "magnet:?xt=urn:btih:d0d31828f07f3eece2d4f0c4a2695cc16cc3e2e0" },
+                    { name: "magnet:?xt=urn:btih:01bd97d642aba6d966b60e43c6005159e2f28c61" }
+                ],
+                "泷泽萝拉": [
+                    { name: "magnet:?xt=urn:btih:70d5de7a820a308488225cc0b1ee33e8188c415d" },
+                    { name: "magnet:?xt=urn:btih:c97c437c55a96d3cd282cc3a7a9b17acf2285e45" },
+                    { name: "magnet:?xt=urn:btih:25b5c3c3b4f2f1d809fe6e1c60609288a3f43ceb" },
+                    { name: "magnet:?xt=urn:btih:cf83452677d24392c45fadfad50f6762a9d62df9" },
+                    { name: "magnet:?xt=urn:btih:62fd0895597f4bd5bdaea6418d482231dc51f363" },
+                    { name: "magnet:?xt=urn:btih:a2c95b0f81ec84f4f9119df608fc30f2fde6980b" },
+                    { name: "magnet:?xt=urn:btih:152287f451afd07d19d136e0980e2628a8fbd3fd" },
+                    { name: "magnet:?xt=urn:btih:ce690f2b5da3fde975c20cb2690f5231412d2221" },
+                    { name: "magnet:?xt=urn:btih:a04365141f33a6019d861948e2e887f0c8071038" },
+                    { name: "magnet:?xt=urn:btih:ba5944e4267384598ca7d32c4f3aeb59e1bcc508" },
+                    { name: "magnet:?xt=urn:btih:c034966cc00c46d60265c11d40e6efb5ac7e8bf0" },
+                    { name: "magnet:?xt=urn:btih:91c3845926e2e43902135bf5da4df64f6b68616e" },
+                    { name: "magnet:?xt=urn:btih:abbcfc0c61adc768cd098696652f723aee97c35c" },
+                    { name: "magnet:?xt=urn:btih:7309504bc55413b9a0954e473db35d1c1b28de80" },
+                    { name: "magnet:?xt=urn:btih:a29eed96c34f58e0f77562115dd0dc052093892f" },
+                    { name: "magnet:?xt=urn:btih:a70a72fb02e3269404a085a5db0cb3d4ee31cf5a" },
+                    { name: "magnet:?xt=urn:btih:39e714e27d8948d411a8872686c2c4206709480d" },
+                    { name: "magnet:?xt=urn:btih:7e46cf6c5eee2781d5ca00607cbad1c474ad4312" }
+                ],
+                "美竹铃": [
+                    { name: "magnet:?xt=urn:btih:da3eeb4152d23fd68046a5b141d584e197a49ea5" },
+                    { name: "magnet:?xt=urn:btih:e29a0d471b691c16fda44ffe843e703315c1b14b" },
+                    { name: "magnet:?xt=urn:btih:ad24e7cdc4a955044034c01a2d33ff6112a67f64" },
+                    { name: "magnet:?xt=urn:btih:00f5071b5ba2c6c900e66e8e54f6006a083e3078" },
+                    { name: "magnet:?xt=urn:btih:2bb716ec97ba4447644f56100118c7f85c6c8a9c" },
+                    { name: "magnet:?xt=urn:btih:2296d0dfa07f1190606e8b5c01cabe4b463363ae" },
+                    { name: "magnet:?xt=urn:btih:1416e84ddb52491674a178423cfbfcca22128819" },
+                    { name: "magnet:?xt=urn:btih:a8e763876a8fc07fa4ac39444d3c5e08837fd67d" },
+                    { name: "magnet:?xt=urn:btih:ff4548d9501bae1e18440974a79bbef4338da9a1" },
+                    { name: "magnet:?xt=urn:btih:c5a6e61a9e7094025ccc61369d7a9e22fb351e68" },
+                    { name: "magnet:?xt=urn:btih:e506ae53a9ebb29e36fe54513b1e1434873d9c29" },
+                    { name: "magnet:?xt=urn:btih:84f1e71689bead4b3cba9a91ab43ed4026d6ecd3" },
+                    { name: "magnet:?xt=urn:btih:bf0c55b2c989e97508fca808ac3ff82a13c75dda" },
+                    { name: "magnet:?xt=urn:btih:cd3f7bfae679b93a769dd8ea099d53033481cc87" },
+                    { name: "magnet:?xt=urn:btih:294f5f50509a4299bf36842a45925fc95882ab95" },
+                    { name: "magnet:?xt=urn:btih:00e2a338782982495b3f4f642ac5f4e454775934" },
+                    { name: "magnet:?xt=urn:btih:c4996f6780c70e4af99260737d04b31e2b978a49" }
+                ],
+                "桥本有菜": [
+                    { name: "magnet:?xt=urn:btih:5a003d9d55833d67e815b676e10e3da303949b69" },
+                    { name: "magnet:?xt=urn:btih:64ccfe53c67eab45f67fde8628db26298f275791" },
+                    { name: "magnet:?xt=urn:btih:079b4836d99c7711fb4da3cc9436c9e08f8678f8" },
+                    { name: "magnet:?xt=urn:btih:55a5376839b18d125a5efc39daf246a4a02479a9" },
+                    { name: "magnet:?xt=urn:btih:9694fe6ae133355c73cf1bef554f7e6322bfcf0e" },
+                    { name: "magnet:?xt=urn:btih:efe3572df0ae1f00b492887d866a6148c2afe37b" },
+                    { name: "magnet:?xt=urn:btih:256d6ba46b01dd11997b86ecd875976625760500" },
+                    { name: "magnet:?xt=urn:btih:a4cb061a820e7cafd2a8ecc9a538939e6f57d739" },
+                    { name: "magnet:?xt=urn:btih:4dcc90d55fa2f0225a1ef57aa478e7a9a864518e" },
+                    { name: "magnet:?xt=urn:btih:c99761251c62a1b49b86b9dfdc0aeb84ca75c9b4" },
+                    { name: "magnet:?xt=urn:btih:14e1ad13bbe37f11f48ff269882b845b6ff9d5fb" },
+                    { name: "magnet:?xt=urn:btih:203f9b3cf5f7865193844a3439b5ad56fecdffa0" },
+                    { name: "magnet:?xt=urn:btih:1bda333d78f2f9c3e041b604d8b9f0432ccd831c" },
+                    { name: "magnet:?xt=urn:btih:2dc4cbc0a350df9141c36d6bd69b52c02e5bef3c" },
+                    { name: "magnet:?xt=urn:btih:28cdc3f665274fa0aee516edd44d548a85fba658" },
+                    { name: "magnet:?xt=urn:btih:85a182446af763fe7d192e5ae6703e4dc6fea832" },
+                    { name: "magnet:?xt=urn:btih:b24286621e0cfb3a6b6eed381f8d60061bd80222" },
+                    { name: "magnet:?xt=urn:btih:4b9f714c90871caa9dc30b99f0f751161e11d2ea" },
+                    { name: "magnet:?xt=urn:btih:1104185e928c78d83ef0569e4231a4f7c319edf0" },
+                    { name: "magnet:?xt=urn:btih:acbaabcc35529479a42ad83913f4cd0644fdac1a" },
+                    { name: "magnet:?xt=urn:btih:6476bb002c7560ebfcf4d08f25e2a70da5769f0c" },
+                    { name: "magnet:?xt=urn:btih:25e4e1e62998c5e79e4d59bffc920e38108441e2" },
+                    { name: "magnet:?xt=urn:btih:25566771c0e2026f58aaaf82087b7f495297a9ca" },
+                    { name: "magnet:?xt=urn:btih:a097453a4938b3839352105c9db8b1c5cb9bb52c" },
+                    { name: "magnet:?xt=urn:btih:0006916da3aa6dbeaf254dc8eada4e97cdbf7d11" },
+                    { name: "magnet:?xt=urn:btih:86500595d52f7d1fa70f365ec190069bb051b1c5" },
+                    { name: "magnet:?xt=urn:btih:ccf209ac47ba85196602e41b3f82cad388b0de7b" },
+                    { name: "magnet:?xt=urn:btih:f58a4e29e6cb4e0e57eee41ff6030a6ce318caf6" },
+                    { name: "magnet:?xt=urn:btih:b6c2e2d1e07e1e23eebffbcce8d7a00fad0b14e0" },
+                    { name: "magnet:?xt=urn:btih:39fb4f2cee54c0d4481a100587660cb2239c155a" },
+                    { name: "magnet:?xt=urn:btih:fa30d062c0a601a8f070753492f42bd017e97138" },
+                    { name: "magnet:?xt=urn:btih:bc71be0e41e55a3b637ab9a0821b5d61bbfd7e48" },
+                    { name: "magnet:?xt=urn:btih:f596becd322face53e11c5a6e3ea20a7fcfecf51" },
+                    { name: "magnet:?xt=urn:btih:eebc91ff1c1bb257806dcdcd9a41b61229aa9e6e" },
+                    { name: "magnet:?xt=urn:btih:a8e9fe7a9fe05b5605b40d6aa037f60b1a605c2c" },
+                    { name: "magnet:?xt=urn:btih:2d42e8e8311e37875a2a6a631666f12b005f535b" },
+                    { name: "magnet:?xt=urn:btih:811f6dbdda02d5ffe0de2267953c4a0e711f699a" },
+                    { name: "magnet:?xt=urn:btih:4987a6e317a74a510972db7958c31e81f7591505" },
+                    { name: "magnet:?xt=urn:btih:fee7989b68071ad8367b061c8b16e348dac2b41d" },
+                    { name: "magnet:?xt=urn:btih:0446084508e947d121b6ff2b5c416918c166eb46" },
+                    { name: "magnet:?xt=urn:btih:71cfa639a4f887ad8572690f719562327c602b4d" },
+                    { name: "magnet:?xt=urn:btih:592fc1fc559d76462a714a0dcb8ce6915cfb61ef" },
+                    { name: "magnet:?xt=urn:btih:d15537e3b9e1eaf613c5a933534f689e53e5c3b8" },
+                    { name: "magnet:?xt=urn:btih:5284e02907c363c9db6de01e2145e7f804b6b71d" },
+                    { name: "magnet:?xt=urn:btih:71586359f4c45b0725a78cd406c8bcc28ca4a1de" },
+                    { name: "magnet:?xt=urn:btih:b65925490fa465f44abf1328905ee7362e224a6f" },
+                    { name: "magnet:?xt=urn:btih:cb3b4860d78d671e208e85551a1b2042778f9d70" },
+                    { name: "magnet:?xt=urn:btih:8510a472e26152019054e5fe35dfe25cd03d3437" },
+                    { name: "magnet:?xt=urn:btih:3c670879f8426924ac4409aaca462ca838bcf279" },
+                    { name: "magnet:?xt=urn:btih:a71ff3684785c506c38dc3fd18480d6e49599098" },
+                    { name: "magnet:?xt=urn:btih:f30eec1d51b4dc4dc862aa1c4869c5fc7f19efb8" },
+                    { name: "magnet:?xt=urn:btih:4313a911ff6e3cd708d751f3583e148e62e991b7" },
+                    { name: "magnet:?xt=urn:btih:8bdce5b1db682a49853544423e7f3800c7edf382" },
+                    { name: "magnet:?xt=urn:btih:6e85b0af29fd09b650fd330bd79c6b2d6317577d" },
+                    { name: "magnet:?xt=urn:btih:ebacc3ca8759d72671808ec44255e0de620ed37e" },
+                    { name: "magnet:?xt=urn:btih:64ccb75816f009727610a76dee5cd17139f72ee6" },
+                    { name: "magnet:?xt=urn:btih:9aa0f636a3862f816a1bf278629ab3fdfad701fe" },
+                    { name: "magnet:?xt=urn:btih:7ce4147b77bb658b8972cfd8fcd37aa0a54c3c6e" },
+                    { name: "magnet:?xt=urn:btih:d105ea011f908a071d64087fc20beffbac7d27e9" },
+                    { name: "magnet:?xt=urn:btih:856367b2f45b38d11d16572a23b7a55be7ff7c0e" },
+                    { name: "magnet:?xt=urn:btih:ff63021ba4eaa4580b5b23a939078e071f97a9ed" },
+                    { name: "magnet:?xt=urn:btih:b769d9bcd541c8cf369f433cf8c746f593c51329" },
+                    { name: "magnet:?xt=urn:btih:8ecdadae92408f5e060fbfab69e92bdf6dd9ca0f" },
+                    { name: "magnet:?xt=urn:btih:7418479cd4b51c16a67a198c18bcdb1a41759a25" },
+                    { name: "magnet:?xt=urn:btih:2119012948b161ecf9f37bd991a75b1798c58080" },
+                    { name: "magnet:?xt=urn:btih:9b591719b9e86b099d85638923272c21dd9a3cb4" },
+                    { name: "magnet:?xt=urn:btih:8510a472e26152019054e5fe35dfe25cd03d3437" },
+                    { name: "magnet:?xt=urn:btih:64ccb75816f009727610a76dee5cd17139f72ee6" },
+                    { name: "magnet:?xt=urn:btih:9b591719b9e86b099d85638923272c21dd9a3cb4" },
+                    { name: "magnet:?xt=urn:btih:cb3b4860d78d671e208e85551a1b2042778f9d70" },
+                    { name: "magnet:?xt=urn:btih:4313a911ff6e3cd708d751f3583e148e62e991b7" },
+                    { name: "magnet:?xt=urn:btih:7418479cd4b51c16a67a198c18bcdb1a41759a25" },
+                    { name: "magnet:?xt=urn:btih:8ecdadae92408f5e060fbfab69e92bdf6dd9ca0f" },
+                    { name: "magnet:?xt=urn:btih:8bdce5b1db682a49853544423e7f3800c7edf382" },
+                    { name: "magnet:?xt=urn:btih:9aa0f636a3862f816a1bf278629ab3fdfad701fe" },
+                    { name: "magnet:?xt=urn:btih:ff63021ba4eaa4580b5b23a939078e071f97a9ed" },
+                    { name: "magnet:?xt=urn:btih:1eb21a1a1ea742bd7ce1700ce794dfc43bc39098" },
+                    { name: "magnet:?xt=urn:btih:2f0d5db9f155c16b31dd81c94fb2be73dc2e0e65" },
+                    { name: "magnet:?xt=urn:btih:723e2cc7cf6d04152590bf3fefea3f2e108cfed9" },
+                    { name: "magnet:?xt=urn:btih:45b8dcbe3c93b94db824709f34ec1c2304910cd4" }
+                ],
+                "山手梨爱": [
+                    { name: "magnet:?xt=urn:btih:c80ed61cb82344088119282e0b832845aaf52e08" },
+                    { name: "magnet:?xt=urn:btih:f8546977a739755a70b7731f27269ac48327be95" },
+                    { name: "magnet:?xt=urn:btih:708de06ec83cce3568e34938f1672320f31873ff" },
+                    { name: "magnet:?xt=urn:btih:5e50eed229b855c4063ed189069fa772cd5ff247" },
+                    { name: "magnet:?xt=urn:btih:1538c7b892d3cf74b9c41ce29ef1d5f9aed01b55" },
+                    { name: "magnet:?xt=urn:btih:b28f52ff03285d513b14b3339e2f75f9325dd6fe" },
+                    { name: "magnet:?xt=urn:btih:c918c0f18f8e60538d5c0040a35d86291b4bbff8" },
+                    { name: "magnet:?xt=urn:btih:61f47efc8b005179344bd9981da21ccec55f3d74" },
+                    { name: "magnet:?xt=urn:btih:23ae6146994b04f5f3ef6ab95c7b1728c0c878e3" },
+                    { name: "magnet:?xt=urn:btih:c2676f791ad1d0e07d23189c5c9a719e4abed270" },
+                    { name: "magnet:?xt=urn:btih:8d0b5a3a3fb829208af06f9d3942220e884e1405" },
+                    { name: "magnet:?xt=urn:btih:bce69eebf91e1d823e252b012f878a52539dfab0" },
+                    { name: "magnet:?xt=urn:btih:34be3c63ae4efb11455997577acd9009a7602de0" },
+                    { name: "magnet:?xt=urn:btih:6936929bd9f475357b29b8fd226bf4308e651703" },
+                    { name: "magnet:?xt=urn:btih:e28dd7e693a36fe55b9e4c19eb5c22da25d87017" },
+                    { name: "magnet:?xt=urn:btih:67601a97959563b4df6757f97e31434257b5697d" },
+                    { name: "magnet:?xt=urn:btih:13082f3df7b63e034380373c9adb8dc6c6f478ed" },
+                    { name: "magnet:?xt=urn:btih:12db9afd691e7350c5f5234995ddecd85825b311" },
+                    { name: "magnet:?xt=urn:btih:09828d01a65b4dc54ed711484a30eee939021bfc" },
+                    { name: "magnet:?xt=urn:btih:d1eeb39101d62fcd8fe4aa95361f5dfec0033975" },
+                    { name: "magnet:?xt=urn:btih:3259c44bdce31ee2083826d3e89e3092fefd9938" },
+                    { name: "magnet:?xt=urn:btih:9195bea8f88984ab4d908f6724409dd618cfa7a6" },
+                    { name: "magnet:?xt=urn:btih:ea315f2f72eb4484a85df51ad1a23facb497a333" },
+                    { name: "magnet:?xt=urn:btih:2207b8bf7fe2383dbbfd888456239796cc26cd7d" }
+                ],
+                "水卜樱": [
+                    { name: "magnet:?xt=urn:btih:b71049fe1762909f4ad936679556986918ca5aab" },
+                    { name: "magnet:?xt=urn:btih:b0eb1b1dcb2720cbc15cca4c3f31077ced055c74" },
+                    { name: "magnet:?xt=urn:btih:1aca6abb4fc6dcf5b305238c5792fc048d644753" },
+                    { name: "magnet:?xt=urn:btih:96c43e0108123102c9e4c916cf345af948d7472b" },
+                    { name: "magnet:?xt=urn:btih:22bfe1d265ae98e741861d5746099964c06b5b96" },
+                    { name: "magnet:?xt=urn:btih:e0c4483ae3e25a2dfab5813641939a816a8a78fb" },
+                    { name: "magnet:?xt=urn:btih:a3237a46ecef650172386f9a242da48005544f5a" },
+                    { name: "magnet:?xt=urn:btih:edf00df2ab61915e3cef676496f7e99726229e70" },
+                    { name: "magnet:?xt=urn:btih:96375aba18fff4fa15b2e2a903b6b5e3375ce9c8" },
+                    { name: "magnet:?xt=urn:btih:36ea3ac8e5917a5d3a9f331ba1869f359b3dea96" },
+                    { name: "magnet:?xt=urn:btih:d2c421775a204f8c50877162a5a7ce4d4f56f67e" },
+                    { name: "magnet:?xt=urn:btih:bf0f61435bae7ac7f97d5f4bed727ca76e50395f" },
+                    { name: "magnet:?xt=urn:btih:647c43bee6e75db872518ac932f96758d69df620" },
+                    { name: "magnet:?xt=urn:btih:3ddd02d28aa39af997c890498a167558f2ffafdb" },
+                    { name: "magnet:?xt=urn:btih:bff3e2ced45164ea0dabacdb901943b4d3ab16d8" },
+                    { name: "magnet:?xt=urn:btih:ddb4e5066ba6ff61d3031afd6917efd3bec30c65" },
+                    { name: "magnet:?xt=urn:btih:8db564547f1d1371e8f063b9fefc387b67b563aa" },
+                    { name: "magnet:?xt=urn:btih:31fa3a3bfc211f83e155482c6d16a40d858769c5" },
+                    { name: "magnet:?xt=urn:btih:136afe7c145bf02bb7a3f521eb9b41dbcdf313e2" },
+                    { name: "magnet:?xt=urn:btih:e2d9e49f25ed40a08e0655823c5ba03d00c3ffe7" },
+                    { name: "magnet:?xt=urn:btih:32c6460198564780dc3ec836270000a8e0815016" },
+                    { name: "magnet:?xt=urn:btih:29c519f8ca1ba0ec23f257c316472ef6e612cc33" },
+                    { name: "magnet:?xt=urn:btih:2ae79eefc1323bc1d391423a6729ac0e8ad7ea48" },
+                    { name: "magnet:?xt=urn:btih:d588e4b844e119b37590d5fefcf2977e34000667" },
+                    { name: "magnet:?xt=urn:btih:6c85f0a6401be4031a5f6ccd4d8fef5d93a55346" },
+                    { name: "magnet:?xt=urn:btih:b65ef2b831312e72ef9da4e51e6d72759b50ea49" },
+                    { name: "magnet:?xt=urn:btih:b37804603243502bd17ecd5690517dbc9984b557" },
+                    { name: "magnet:?xt=urn:btih:9228714548619bdffd51cb11872333a481d8b719" },
+                    { name: "magnet:?xt=urn:btih:9aa51613b9d8d4820db1900d3506a5880a87918c" },
+                    { name: "magnet:?xt=urn:btih:f93901874619557d1b3fef405ab9a50dc492e0e8" },
+                    { name: "magnet:?xt=urn:btih:693b51760fb69f71b0977b41630b753ff9cc6065" },
+                    { name: "magnet:?xt=urn:btih:b3dd5abb1e59f4e4dfe3dbfc673f176efab5e1d8" }
+                ],
+                "桃谷绘里香": [
+                    { name: "magnet:?xt=urn:btih:7a44570d6195e219aff915f1fadc06afdf0ce79d" },
+                    { name: "magnet:?xt=urn:btih:6e51f48a8d6327c771b0048dfa85ea0b61956b55" },
+                    { name: "magnet:?xt=urn:btih:eb8e56e3bd28de5893ad1a717ebddef9366de45f" },
+                    { name: "magnet:?xt=urn:btih:a16e40cc0296ac3e8b1eeb6e41d0384985efc633" },
+                    { name: "magnet:?xt=urn:btih:d929b9f1051934a0f1bc8152f540041ded342d15" },
+                    { name: "magnet:?xt=urn:btih:ca1e90de0075aaf3ada7ec4c0173cdee6cb6be9f" },
+                    { name: "magnet:?xt=urn:btih:cac0fd3e1d077b4aa50108ec8842c7b3bb963ddd" },
+                    { name: "magnet:?xt=urn:btih:fd5d88cf2d7eab63ae764686e81ea8795cd89b41" },
+                    { name: "magnet:?xt=urn:btih:89d15145d19f737fce6ad31e2bbbda00a7907cde" },
+                    { name: "magnet:?xt=urn:btih:4b03e1ea47c5d06a268a70a7e6f1ce8491c89653" },
+                    { name: "magnet:?xt=urn:btih:51cbbd28306b4b4d4e9f828a3a362607ddc96117" }
+                ],
+                "桃乃木": [
+                    { name: "magnet:?xt=urn:btih:fbcd21772e7be377435350e066719d1500116438" },
+                    { name: "magnet:?xt=urn:btih:6eb7216a58db0be9c597268054256035db1e8cf8" },
+                    { name: "magnet:?xt=urn:btih:8a98a14548ed9745f66264fd8bbe6c6b5833785c" },
+                    { name: "magnet:?xt=urn:btih:1a16529f93e443bbbdc6a7bf351a69f899b41b94" },
+                    { name: "magnet:?xt=urn:btih:256891753eb978a6836b5188c0113959f04478a9" },
+                    { name: "magnet:?xt=urn:btih:857c4177a63fc1d52bef58eeb84d1d512ec5bbf8" },
+                    { name: "magnet:?xt=urn:btih:388739e25496f480cb60b6d8cf98da755be5b44b" },
+                    { name: "magnet:?xt=urn:btih:05c8b57533ec0c677c282f254bb00f544d0cfba3" },
+                    { name: "magnet:?xt=urn:btih:aee866e5d016cd210b24d5b6322af5b30e3f4000" },
+                    { name: "magnet:?xt=urn:btih:837a54b939b38ed99920a117c45fe4b8de6eff79" },
+                    { name: "magnet:?xt=urn:btih:0c6e3363651704a54d547bf5beb85ea0f05794e8" },
+                    { name: "magnet:?xt=urn:btih:86412239198fdc2c3c6f040ca78dc7b7b11b0cf0" },
+                    { name: "magnet:?xt=urn:btih:40ee8b8ac1616bbc80c39f65dcdb46bd1baf6e1b" },
+                    { name: "magnet:?xt=urn:btih:66f01c32a81a0269c27e5a6918cb1d17bb70b3d4" },
+                    { name: "magnet:?xt=urn:btih:6470a13c91005a0a219d78eeda4d62409b5f76bd" },
+                    { name: "magnet:?xt=urn:btih:09efb28048c0f2a2d4c84ca1a8f55705b0a2da68" },
+                    { name: "magnet:?xt=urn:btih:a98ac00912cb312693f650a2fc8e14d0c53744d3" },
+                    { name: "magnet:?xt=urn:btih:3b3a508a6a9bfb9fa2cd812a7a42f433a31b0bcf" },
+                    { name: "magnet:?xt=urn:btih:fd960ae47935043ca1bda694b128a90857e4b3d8" },
+                    { name: "magnet:?xt=urn:btih:14ec79f6a17e69866e243b0418800ad0d4aaa3e0" },
+                    { name: "magnet:?xt=urn:btih:3331fd5ad5a2d6bb9c74d9e20be3dfd33a5418cb" },
+                    { name: "magnet:?xt=urn:btih:426845ff869b88a71a2c4088d46c5bd3d08f7939" },
+                    { name: "magnet:?xt=urn:btih:a7b6fb68436c9ad11c83129cb79dc6dc975872f6" },
+                    { name: "magnet:?xt=urn:btih:d89cc8833d42dbe2682dc894881722328da25808" },
+                    { name: "magnet:?xt=urn:btih:f8384ebd661e151027c5c51d8c436bb23905ae43" },
+                    { name: "magnet:?xt=urn:btih:6bbbf151e08dc807e43cf65756357b4fb15c04e7" },
+                    { name: "magnet:?xt=urn:btih:cd368d275fb3d28bc57ce6017fab348b52322867" },
+                    { name: "magnet:?xt=urn:btih:899b841d34092c512801e8e332bca76b4e061bc5" },
+                    { name: "magnet:?xt=urn:btih:450c78af4536456a4810070de7e3f3ea3a375275" },
+                    { name: "magnet:?xt=urn:btih:4ce4724503d7a0a7b70d01570768443656c1d8a3" },
+                    { name: "magnet:?xt=urn:btih:94d3b5f413e15a523de7da6e8f830ab76cb1edca" },
+                    { name: "magnet:?xt=urn:btih:8ed93ca015c68c0b3a526933754866d28497eec8" },
+                    { name: "magnet:?xt=urn:btih:e8616c2d7e18aa066d5e149ece944407c41f267e" },
+                    { name: "magnet:?xt=urn:btih:aa0a197180472a2c1f0b2a01180f684730cc4b10" },
+                    { name: "magnet:?xt=urn:btih:8f86dcb57577995d10f15a1ee7675ff70d634d17" },
+                    { name: "magnet:?xt=urn:btih:9199b3bc12e30c3f785dc61fc3054143fe4c459f" },
+                    { name: "magnet:?xt=urn:btih:c3bbb546625debf2ed6eaf039bf8a862b32b2c67" },
+                    { name: "magnet:?xt=urn:btih:29fdcd8a2a8a6de085160b12a54cee1ec251a655" },
+                    { name: "magnet:?xt=urn:btih:e746804528c9987f727901700b7029697ba6752a" },
+                    { name: "magnet:?xt=urn:btih:49bb5fdab454f6888c374257999219d1a3f9ae17" },
+                    { name: "magnet:?xt=urn:btih:651b33b650fffff19f88458ee908f03e80adfc53" },
+                    { name: "magnet:?xt=urn:btih:20dd3e0c4a6a549a61e839fe7da20a39a47b60e5" },
+                    { name: "magnet:?xt=urn:btih:d69a74b5b3c2dde7e73d1dc6eb0058395f886580" },
+                    { name: "magnet:?xt=urn:btih:e9ec90b596d9579eb746a1be084382357f64ff0c" },
+                    { name: "magnet:?xt=urn:btih:888dcd35b0d09765819f9501869b2ff5d9c39a5b" },
+                    { name: "magnet:?xt=urn:btih:d20df5cce6bfa547dc105b093bd54af4e885bf1e" },
+                    { name: "magnet:?xt=urn:btih:bffcffff8bc51513b6710739c88590efc8c019a2" },
+                    { name: "magnet:?xt=urn:btih:1a0164368b84bf8dacd7d4c9bc9fb6b2ddcf7572" },
+                    { name: "magnet:?xt=urn:btih:e8b6029ec7d77fe2a870b8a9e1621ef520b0b2d0" },
+                    { name: "magnet:?xt=urn:btih:673c0466a625a9cb08d957d86e12b8fd458dccf0" },
+                    { name: "magnet:?xt=urn:btih:66f7e01b276212b5d99e6bfc170040ce6485360e" },
+                    { name: "magnet:?xt=urn:btih:9a4f71a82d3227d302b9e030538d53367bbc1543" },
+                    { name: "magnet:?xt=urn:btih:670f4b1098bb1aed952d446482a0675bab8f88a8" },
+                    { name: "magnet:?xt=urn:btih:6d5d3929ab39d8491dec50d62829658d5ddec0aa" },
+                    { name: "magnet:?xt=urn:btih:3c8aa0027eb5d5b17b5fa0eedc110f33c2e9b83a" },
+                    { name: "magnet:?xt=urn:btih:9009cc73607a04d4ddc61cf3fd8ca5dcd94ad968" },
+                    { name: "magnet:?xt=urn:btih:d805ee263e307d22dd17e1d6806ad70a943eb304" },
+                    { name: "magnet:?xt=urn:btih:a2afe6d0c80fbe9f0497d7aa93fd100e6ec62c41" },
+                    { name: "magnet:?xt=urn:btih:927e931075ab4ccbb20dca75d7acf715f40e37b5" }
+                ],
+                "伊藤圣夏": [
+                    { name: "magnet:?xt=urn:btih:763995b4073eeb4827ea651f59e4d5512bb5dd7d" },
+                    { name: "magnet:?xt=urn:btih:d307560ecb5aa1c1ba8407ec0994583c44ec7fd9" },
+                    { name: "magnet:?xt=urn:btih:8266fd3986bda863503b5a485876ef256c7f0dd7" },
+                    { name: "magnet:?xt=urn:btih:ab51e63aaf938a58c13e134899f9684b0249f19b" },
+                    { name: "magnet:?xt=urn:btih:86bf4eb16c169f21e3f1ac5c24850c8888704c3c" },
+                    { name: "magnet:?xt=urn:btih:7193b29ffb90695e72f1ca2a0be68a59214969eb" },
+                    { name: "magnet:?xt=urn:btih:038a2c4686c885c96f9361d2926c91c299fbae87" },
+                    { name: "magnet:?xt=urn:btih:bd3d442c8a5e1ea848e5ab330cd9eb6a7fd3a654" },
+                    { name: "magnet:?xt=urn:btih:0628b6fbdd1ec65dccc3b3ff954d25de2000f8ca" },
+                    { name: "magnet:?xt=urn:btih:5c55d432d02279222dd1f594e84d3a39267f3a7e" },
+                    { name: "magnet:?xt=urn:btih:f0d5a529c1a9fede0b65a56262913ee6f5dfae5a" },
+                    { name: "magnet:?xt=urn:btih:13b10f6cdad995ea8c2a3584e9411684a7f1145a" }
+                ],
+                "伊藤舞雪": [
+                    { name: "magnet:?xt=urn:btih:e76ce7094195dfb12e6aafc5a629c6e449e8ef0c" },
+                    { name: "magnet:?xt=urn:btih:346d7b4ed9ca1affc8cfd1b69403de67e03efb5a" },
+                    { name: "magnet:?xt=urn:btih:93ab945765c0c6cc86bd936caa6166cfd3cc648b" },
+                    { name: "magnet:?xt=urn:btih:a10565a36f34478dce48c98f0fd4e812a349a4a2" },
+                    { name: "magnet:?xt=urn:btih:70636fd6b159b5cbff84d89253b2f7a5dce27f98" },
+                    { name: "magnet:?xt=urn:btih:a2e41e103e5717621e13f77c2d0229b2ab7a8abd" },
+                    { name: "magnet:?xt=urn:btih:c2dfad435f9cb9b7e96c7bf08b9dd35bfbbc9627" },
+                    { name: "magnet:?xt=urn:btih:d020edf5c91ef2a681d647e594d9f4d1f422a907" },
+                    { name: "magnet:?xt=urn:btih:99f68140dd33598818ca9d8baa85d9b3e546fc92" },
+                    { name: "magnet:?xt=urn:btih:eb21bfe9edf903034cbc2478c13f90851bc16ab6" },
+                    { name: "magnet:?xt=urn:btih:61976450917f5b13f0f2551c7ae8b22e106ba129" },
+                    { name: "magnet:?xt=urn:btih:fd45b7596b1e65fbdf63f479cc06a5567cb326b9" },
+                    { name: "magnet:?xt=urn:btih:ae97373fed8d584f149cd0e9a55e649799ccc102" },
+                    { name: "magnet:?xt=urn:btih:243056c481726d67e680582e57fd0e0cf077cdb5" },
+                    { name: "magnet:?xt=urn:btih:e01a65eb4842f68e642006b79b7802e71bdeba74" },
+                    { name: "magnet:?xt=urn:btih:7d3aaae9d969e42cde269b489725eb9794fc796f" },
+                    { name: "magnet:?xt=urn:btih:86c281e264b270b745ac334ffcfe013c262691bc" },
+                    { name: "magnet:?xt=urn:btih:8ea2799b58c031f48df97022037f7cb273de1421" },
+                    { name: "magnet:?xt=urn:btih:766b489afdf8473c22093d8f366f2388a08abbdb" },
+                    { name: "magnet:?xt=urn:btih:fb3f55eaf93b1ad4c0ac88ec03536a77cbda19e3" },
+                    { name: "magnet:?xt=urn:btih:f816ded8cd6dcf5e101216a453ce8862fb52d473" },
+                    { name: "magnet:?xt=urn:btih:16d3bbd110dd2add2182f224a818a4acc817e5cb" },
+                    { name: "magnet:?xt=urn:btih:8b0c57cbaed0d947c92e17b04e841f9e6d9fe19b" },
+                    { name: "magnet:?xt=urn:btih:7e44295c4276a303a18c68cd23a6a937ff668f23" },
+                    { name: "magnet:?xt=urn:btih:b259d6f35386e8e02912ec29e45f17085fe22acd" },
+                    { name: "magnet:?xt=urn:btih:51f0472aaf774daa15c33fba01bff916de5a7980" },
+                    { name: "magnet:?xt=urn:btih:c1d2d77e87b3a885afaa57818abf451d985f4d8e" },
+                    { name: "magnet:?xt=urn:btih:53181c11e638630de0e72d4c095de23e4aafddbe" },
+                    { name: "magnet:?xt=urn:btih:90aa84cdc94f3d0b467a3e3f6aa2930c2daf915d" },
+                    { name: "magnet:?xt=urn:btih:cf3e45cdefeb9bcb3db0904e4f0173eab4f5e287" },
+                    { name: "magnet:?xt=urn:btih:dc38ac4227ee81e670c72de45370c5d1624f24a1" },
+                    { name: "magnet:?xt=urn:btih:39410f2a93a28e0ffc5c824974706d0ee35b2ab2" },
+                    { name: "magnet:?xt=urn:btih:7f846dcba794cc398e0bfa92a76481b043700114" },
+                    { name: "magnet:?xt=urn:btih:c65dfb0110c1bfce1c53196c5824e0ef1179d496" },
+                    { name: "magnet:?xt=urn:btih:d01187632f9a5c2cce5ecd7a90123d37c055758e" },
+                    { name: "magnet:?xt=urn:btih:888a325ccbf3379318c21980f110ece337faa8a1" },
+                    { name: "magnet:?xt=urn:btih:99cd0f494b75344c03da0ac64e9173bde54f039c" },
+                    { name: "magnet:?xt=urn:btih:1913f25e4cfe4d37195fc8cee0d43853873b1724" },
+                    { name: "magnet:?xt=urn:btih:fccc15e668ecd3d6f26906f3383cc57937b13613" },
+                    { name: "magnet:?xt=urn:btih:10b9a76ca93f76f7d221f824f7c4126cfb755f0e" },
+                    { name: "magnet:?xt=urn:btih:37253fab7083fdd4026e3d7f3bc5179ca8e45bcc" },
+                    { name: "magnet:?xt=urn:btih:7fee7c568d52e9479f8b3df838c5f041b7cd3073" },
+                    { name: "magnet:?xt=urn:btih:db6afbff956f805f176c72ae588c9b27706e6611" },
+                    { name: "magnet:?xt=urn:btih:bd13409a3ad9fd9880d9e00bb374d8666afe7671" },
+                    { name: "magnet:?xt=urn:btih:93e739dd7c14807a89017c3e84732627476d8dec" },
+                    { name: "magnet:?xt=urn:btih:fe603512eace84ff9bf6ef0403a3a81d33ad4ad2" },
+                    { name: "magnet:?xt=urn:btih:e417a2a9f39258ed159f729c32d14932cbdbfe30" },
+                    { name: "magnet:?xt=urn:btih:5b8dc73e5edab2197d9f50961cf11b4f2ac6dff8" },
+                    { name: "magnet:?xt=urn:btih:fc8b95af52dd76cb82722b386eace7e0ffefc4b4" }
+                ],
+                "樱空桃": [
+                    { name: "magnet:?xt=urn:btih:9c5a95109d55649fbe33e17c72a57181c7928ab2" },
+                    { name: "magnet:?xt=urn:btih:297d8f1bce754354872c10f5786a19842750e5f7" },
+                    { name: "magnet:?xt=urn:btih:9bbefd7502cb99b9ec894dc7285208f5fcc0f836" },
+                    { name: "magnet:?xt=urn:btih:9559ee255584164b0c3147039438c362b6628be6" },
+                    { name: "magnet:?xt=urn:btih:5fa166e26c214df71c8722ad73f6e49285d161df" },
+                    { name: "magnet:?xt=urn:btih:d80b2063ada2f4997d82ced84a067ad88481671f" },
+                    { name: "magnet:?xt=urn:btih:48e590b3f1c360d09fe5aac2193bb70066e344eb" },
+                    { name: "magnet:?xt=urn:btih:4a2401cac4da41b9ac0c4f0af63014d50507f704" },
+                    { name: "magnet:?xt=urn:btih:405445281ba655c2deb01326ede3efd74e4bfdd6" },
+                    { name: "magnet:?xt=urn:btih:91d00a8103a4e1162c1bc475fa035e6a889f7ed5" },
+                    { name: "magnet:?xt=urn:btih:1a1d24b646166396ae4c08e48eb35e3ff14bce14" },
+                    { name: "magnet:?xt=urn:btih:64a82a2da3b9db3d05f80359abe49361d2833ada" },
+                    { name: "magnet:?xt=urn:btih:2b6fc47317f564c0d2a4773ae8dc8ae5de28440c" },
+                    { name: "magnet:?xt=urn:btih:ce59c68a3abf7cc19c6c047fa08df62c7a53a2aa" },
+                    { name: "magnet:?xt=urn:btih:a8981272563a81e2aa2b94b62af4b7bdca3d20ba" },
+                    { name: "magnet:?xt=urn:btih:5d03c14b728a4a93156fbaa2d430400e8ed1adb5" },
+                    { name: "magnet:?xt=urn:btih:02d76ab55a193106add9d2067cad01a254f5dfd7" },
+                    { name: "magnet:?xt=urn:btih:4f4544b83f324d9bd7553b02d449243f1919faed" },
+                    { name: "magnet:?xt=urn:btih:d40281aa39d2e6d4ca509f325a4f8d606ac33433" },
+                    { name: "magnet:?xt=urn:btih:7447b37f2227c7d257a89043006d6ed561948430" },
+                    { name: "magnet:?xt=urn:btih:537a6c148d3f37771ac2c55e52b630f8e92a0778" },
+                    { name: "magnet:?xt=urn:btih:2cb4b672bdabd2e4317497cb1f8815f90a50ebfc" },
+                    { name: "magnet:?xt=urn:btih:d34bdb221fdd0ce0dec8ef1068c33cfb81960905" },
+                    { name: "magnet:?xt=urn:btih:9ba1e19eabd7017f9e1b5e8616098b6bbe1ee8c0" },
+                    { name: "magnet:?xt=urn:btih:9efe87afe2507de465fa3d24a9559581f27c62e0" },
+                    { name: "magnet:?xt=urn:btih:82734df8bf7ee71d18907ece8a29c71959079488" },
+                    { name: "magnet:?xt=urn:btih:ea8d1a4ab1edc10822c965c45a03a9188a6e64d6" },
+                    { name: "magnet:?xt=urn:btih:7948bafbe179d195abfc29a4a6fdd5cfe4634dc6" },
+                    { name: "magnet:?xt=urn:btih:8cab0ad82a2c78edc51f0129dbe743a06643fd78" },
+                    { name: "magnet:?xt=urn:btih:5cc701de91fc3ed2e4c190d04f779e7f8030952c" },
+                    { name: "magnet:?xt=urn:btih:c99e76555708d44b8fd605864903a5b8a04d9beb" },
+                    { name: "magnet:?xt=urn:btih:5dc0b87e71718bde7ef5d4525f07d1e715d76698" },
+                    { name: "magnet:?xt=urn:btih:d2a48af7e57ccdc189c790acda4b116a091b5fc0" },
+                    { name: "magnet:?xt=urn:btih:04e54dd5e4d2dd9db3d5d2fc0a19aee3caac1abe" },
+                    { name: "magnet:?xt=urn:btih:a7052e555759090bdf546f7ff057c20b0af5a302" },
+                    { name: "magnet:?xt=urn:btih:1284ec7e026d2c61ebb39b39776feee3b4114845" },
+                    { name: "magnet:?xt=urn:btih:28d046829b52be8d86dc4c62779a352bf5793099" },
+                    { name: "magnet:?xt=urn:btih:feb88c7c361fcb69b534672d216de1a31b04f494" },
+                    { name: "magnet:?xt=urn:btih:69ce3eea8b3ca94bbc8604daf7e79fafc9b8cc5f" },
+                    { name: "magnet:?xt=urn:btih:95c3c5fc45a93e15ac739d3e569ce829467af078" },
+                    { name: "magnet:?xt=urn:btih:3ba7046dfb85cb4aa54e9b539bc3f00c9ad1673f" },
+                    { name: "magnet:?xt=urn:btih:c786d4571eb861593b9916c1b5410d6031765ed5" },
+                    { name: "magnet:?xt=urn:btih:b61f43b98aac0c4790d0f5c9aa3499b9ae5d842d" },
+                    { name: "magnet:?xt=urn:btih:01536f2a9459b310cecece0491caf0ac153166f5" },
+                    { name: "magnet:?xt=urn:btih:e5a4c3efdfecd4d0954d582fb74e5c68b4ec40fc" },
+                    { name: "magnet:?xt=urn:btih:6b5911bc4a2ebe02fa130851f708f8189fe4aaf4" },
+                    { name: "magnet:?xt=urn:btih:b8e1a4b1beb10249b7be729d1077e5c836a6938e" }
+                ],
+                "安斋拉拉": [
+                    { name: "magnet:?xt=urn:btih:85d8d1b19ebf0a6d5d48d4086e01dda0b152b980" },
+                    { name: "magnet:?xt=urn:btih:b90d199dda2e5a9076e39569e95a9b7f653922f2" },
+                    { name: "magnet:?xt=urn:btih:af2548d8c3e99617a4c7b4529969ca4366727a90" },
+                    { name: "magnet:?xt=urn:btih:40658195c48298e2743d337ae89a3f4776438dc8" },
+                    { name: "magnet:?xt=urn:btih:14063df291a2f8fdfe29af16a9b29bc8c3ed0e9f" },
+                    { name: "magnet:?xt=urn:btih:81cc207ffaf170726d422e19165abfb59e7bb2ae" },
+                    { name: "magnet:?xt=urn:btih:d66306b2345afaa838d96c16b5bf9870230d4a9b" },
+                    { name: "magnet:?xt=urn:btih:ec4ad3c8100bdd9df7dae1abfbc7f723dabbd894" },
+                    { name: "magnet:?xt=urn:btih:6f309267d07904bfca3d8a0b5cf31d958793d701" },
+                    { name: "magnet:?xt=urn:btih:0337fd37d520eed2d9910d762365df5d9c632d34" },
+                    { name: "magnet:?xt=urn:btih:a8221b35fb201433e33357498dd3527dc6874edc" },
+                    { name: "magnet:?xt=urn:btih:933015d3fea638464ff6fcebb141e89a55b8142b" },
+                    { name: "magnet:?xt=urn:btih:48c0b77782c3bb5a4dc5f2beb7efc346c1820f8c" },
+                    { name: "magnet:?xt=urn:btih:d8fa266ccd4251436d580a142b554c6615a4067d" },
+                    { name: "magnet:?xt=urn:btih:fb1b07ce17c7e170114546296afb5557f3679134" },
+                    { name: "magnet:?xt=urn:btih:81b45e0824313a584ff9ca6174710d5ddba229c6" },
+                    { name: "magnet:?xt=urn:btih:2a2c3e87d948592e04c84d9fb177d91cbb4354ff" },
+                    { name: "magnet:?xt=urn:btih:b908e0301fa609ea632f0a7e554514df8859c8a0" },
+                    { name: "magnet:?xt=urn:btih:29c40acfc453a85b5a6175881238ac785b6026c6" }
+                ],
+            };
+
+            // 当前可用的二级奖品池（按奖项分类）
+            let availableSecondLevelPrizes = {};
+
+            // 初始化二级奖品池 - 打乱每个奖项的奖品顺序
+            function initializeSecondLevelPrizes() {
+                availableSecondLevelPrizes = {};
+                for (const award in secondLevelPrizesByAward) {
+                    // 每个奖项的奖品池都独立打乱顺序
+                    availableSecondLevelPrizes[award] = shuffleArray([...secondLevelPrizesByAward[award]]);
+                }
+            }
+
+            // 初始化
+            initializeSecondLevelPrizes();
+
+            // DOM元素
+            const firstLevelBox = document.querySelector('.blind-box');
+            const firstLevelBtn = document.getElementById('first-level-btn');
+            const firstLevelPrize = document.getElementById('first-level-prize');
+            const secondLevelContainer = document.getElementById('second-level-container');
+            const secondLevelBtn = document.getElementById('second-level-btn');
+            const secondLevelPrize = document.getElementById('second-level-prize');
+            const historyList = document.getElementById('history-list');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const resetLotteryBtn = document.getElementById('reset-lottery-btn');
+            const firstLevelCounter = document.getElementById('first-level-counter');
+            const secondLevelCounter = document.getElementById('second-level-counter');
+            const secondLevelInfo = document.getElementById('second-level-info');
+            const currentAwardSpan = document.getElementById('current-award');
+
+            let currentFirstLevelPrize = null;
+            let drawHistory = [];
+
+            // 动态计算一级奖品总数
+            function getFirstLevelTotalCount() {
+                // 从历史记录中统计已抽中的一级奖品数量
+                const drawnCount = drawHistory.filter(item => item.level === "一级").length;
+                // 总数量 = 剩余数量 + 已抽中数量
+                return firstLevelPrizes.length + drawnCount;
+            }
+
+            // 更新一级奖品计数器
+            function updateFirstLevelCounter() {
+                const remaining = firstLevelPrizes.length;
+                //const total = getFirstLevelTotalCount();
+                const total =37;
+                firstLevelCounter.innerHTML = `剩余奖品: <span>${remaining}</span>/${total}`;
+            }
+
+            // 更新二级奖品计数器
+            function updateSecondLevelCounter() {
+                if (!currentFirstLevelPrize || !availableSecondLevelPrizes[currentFirstLevelPrize.name]) {
+                    secondLevelCounter.innerHTML = '剩余奖品: <span>0</span>/0';
+                    return;
+                }
+
+                const award = currentFirstLevelPrize.name;
+                const remaining = availableSecondLevelPrizes[award].length;
+                const total = secondLevelPrizesByAward[award].length;
+                secondLevelCounter.innerHTML = `剩余奖品: <span>${remaining}</span>/${total}`;
+            }
+
+            // 初始化计数器
+            updateFirstLevelCounter();
+
+            // 创建彩色纸屑效果
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                const confettiCount = isQuarkBrowser() ? 20 : 30;
+
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = Math.random() * 8 + 5 + 'px';
+                    confetti.style.height = Math.random() * 8 + 5 + 'px';
+                    confetti.style.opacity = Math.random() * 0.5 + 0.5;
+                    confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        if (confetti.parentNode) {
+                            confetti.remove();
+                        }
+                    }, 5000);
+                }
+            }
+
+            // 添加抽奖记录 - 已修改：一级奖品显示name属性
+            function addToHistory(prize, level, awardName = null) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                const dateString = now.toLocaleDateString('zh-CN');
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+
+                // 判断是一级奖品还是二级奖品
+                let displayName, isMagnet, safePrizeName;
+
+                if (level === "一级") {
+                    // 一级奖品：直接显示奖品名称
+                    displayName = prize;
+                    isMagnet = false;
+                    safePrizeName = prize.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                } else {
+                    // 二级奖品：显示磁力链接的文件名
+                    safePrizeName = prize.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    isMagnet = true;
+                    displayName = '磁力链接';
+                    const nameMatch = prize.match(/dn=([^&]+)/);
+                    if (nameMatch) {
+                        const fileName = decodeURIComponent(nameMatch[1]);
+                        displayName = fileName.length > 20 ? fileName.substring(0, 20) + '...' : fileName;
+                    }
+                }
+
+                // 如果是二级奖品，显示所属奖项
+                const category = (level === "二级" && awardName) ? `<span class="prize-category">${awardName}</span>` : '';
+
+                // 根据奖品类型决定是否显示下载按钮
+                const buttonHtml = isMagnet
+                    ? `<button class="download-btn" data-magnet="${safePrizeName}">
+                          <i class="fas fa-download"></i> 下载
+                       </button>`
+                    : '';
+
+                historyItem.innerHTML = `
+                    <div class="prize-info">
+                        <div class="prize-name">
+                            ${displayName}
+                            <span class="level-badge">${level}</span>
+                            ${category}
+                        </div>
+                        ${isMagnet ? '<div class="magnet-link">磁力链接</div>' : ''}
+                        <div class="prize-time">${dateString} ${timeString}</div>
+                    </div>
+                    ${buttonHtml}
+                `;
+
+                historyList.insertBefore(historyItem, historyList.firstChild);
+
+                // 如果是二级奖品，添加下载事件监听
+                if (isMagnet) {
+                    const downloadBtn = historyItem.querySelector('.download-btn');
+                    downloadBtn.addEventListener('click', function (e) {
+                        handleMagnetDownload(prize, e);
+                    });
+                }
+
+                drawHistory.unshift({
+                    name: prize,
+                    displayName: displayName,
+                    time: `${dateString} ${timeString}`,
+                    type: isMagnet ? 'magnet' : 'text',
+                    level: level,
+                    awardName: awardName
+                });
+
+                const maxHistory = isQuarkBrowser() ? 30 : 50;
+                if (drawHistory.length > maxHistory) {
+                    drawHistory.pop();
+                    if (historyList.children.length > maxHistory) {
+                        historyList.removeChild(historyList.lastChild);
+                    }
+                }
+
+                localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
+            }
+
+            // 加载历史记录
+            function loadHistory() {
+                const savedHistory = localStorage.getItem('drawHistory');
+                if (savedHistory) {
+                    try {
+                        drawHistory = JSON.parse(savedHistory);
+
+                        const welcomeItem = historyList.querySelector('.history-item');
+                        historyList.innerHTML = '';
+                        if (welcomeItem) {
+                            historyList.appendChild(welcomeItem);
+                        }
+
+                        drawHistory.forEach(item => {
+                            const historyItem = document.createElement('div');
+                            historyItem.className = 'history-item';
+
+                            const safePrizeName = item.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                            const isMagnet = item.type === 'magnet';
+                            const category = (item.level === "二级" && item.awardName)
+                                ? `<span class="prize-category">${item.awardName}</span>`
+                                : '';
+
+                            const buttonHtml = isMagnet
+                                ? `<button class="download-btn" data-magnet="${safePrizeName}">
+                                      <i class="fas fa-download"></i> 下载
+                                   </button>`
+                                : '';
+
+                            historyItem.innerHTML = `
+                                <div class="prize-info">
+                                    <div class="prize-name">
+                                        ${item.displayName || item.name}
+                                        <span class="level-badge">${item.level || '未知'}</span>
+                                        ${category}
+                                    </div>
+                                    ${isMagnet ? '<div class="magnet-link">磁力链接</div>' : ''}
+                                    <div class="prize-time">${item.time}</div>
+                                </div>
+                                ${buttonHtml}
+                            `;
+
+                            if (isMagnet) {
+                                const downloadBtn = historyItem.querySelector('.download-btn');
+                                downloadBtn.addEventListener('click', function (e) {
+                                    handleMagnetDownload(item.name, e);
+                                });
+                            }
+
+                            historyList.appendChild(historyItem);
+                        });
+
+                        // 更新计数器
+                        updateFirstLevelCounter();
+                    } catch (e) {
+                        console.error('加载历史记录失败:', e);
+                        showNotification('历史记录加载失败', 'info');
+                    }
+                }
+            }
+
+            // 清空历史记录
+            function clearHistory() {
+                if (drawHistory.length === 0) {
+                    showNotification('没有可清空的历史记录', 'info');
+                    return;
+                }
+
+                if (confirm('确定要清空所有抽奖记录吗？此操作不可撤销。')) {
+                    drawHistory = [];
+                    historyList.innerHTML = '';
+                    localStorage.removeItem('drawHistory');
+
+                    const defaultItem = document.createElement('div');
+                    defaultItem.className = 'history-item';
+                    defaultItem.innerHTML = `
+                        <div class="prize-info">
+                            <div class="prize-name">抽奖记录已清空</div>
+                            <div class="prize-time">请开始新的抽奖</div>
+                        </div>
+                    `;
+                    historyList.appendChild(defaultItem);
+
+                    // 更新计数器
+                    updateFirstLevelCounter();
+
+                    showNotification('历史记录已清空', 'success');
+                }
+            }
+
+            // 重置抽奖
+            function resetLottery() {
+                if (confirm('确定要重置抽奖吗？将恢复所有奖品并清空当前进度。')) {
+                    // 重置一级奖品
+                    firstLevelPrizes.length = 0;
+                    firstLevelPrizes.push(
+                        { name: "枫花恋", secondChance: true },
+                        { name: "高桥圣子", secondChance: true },
+                        { name: "河北彩花", secondChance: true },
+                        { name: "葵司", secondChance: true },
+                        { name: "葵伊吹", secondChance: true },
+                        { name: "濑户环奈", secondChance: true },
+                        { name: "泷泽萝拉", secondChance: true },
+                        { name: "美竹铃", secondChance: true },
+                        { name: "桥本有菜", secondChance: true },
+                        { name: "山手梨爱", secondChance: true },
+                        { name: "水卜樱", secondChance: true },
+                        { name: "桃谷绘里香", secondChance: true },
+                        { name: "桃乃木", secondChance: true },
+                        { name: "伊藤圣夏", secondChance: true },
+                        { name: "伊藤舞雪", secondChance: true },
+                        { name: "樱空桃", secondChance: true },
+                        { name: "安斋拉拉", secondChance: true },
+                        { name: "爱弓凉", secondChance: true },
+                        { name: "枫富爱", secondChance: true },
+                        { name: "泷本雫叶", secondChance: true },
+                        { name: "凉森玲梦", secondChance: true },
+                        { name: "天使亚梦", secondChance: true },
+                        { name: "一心绘里香", secondChance: true },
+                        { name: "三澄宁宁", secondChance: true },
+                        { name: "紫堂留衣", secondChance: true },
+                        { name: "橘日菜", secondChance: true },
+                        { name: "小坂七香", secondChance: true },
+                        { name: "宫下玲奈", secondChance: true },
+                        { name: "天川空", secondChance: true },
+                        { name: "小野夕子", secondChance: true },
+                        { name: "百田光希", secondChance: true },
+                        { name: "蓝芽水月", secondChance: true },
+                        { name: "藤森里穗", secondChance: true },
+                        { name: "林由奈", secondChance: true },
+                        { name: "铃木心春", secondChance: true },
+                        { name: "七濑爱丽丝", secondChance: true },
+                        { name: "奶葵", secondChance: true },
+                    );
+
+                    // 重置二级奖品池
+                    initializeSecondLevelPrizes();
+
+                    // 重置UI状态
+                    currentFirstLevelPrize = null;
+                    firstLevelBtn.disabled = false;
+                    secondLevelBtn.disabled = false;
+                    secondLevelContainer.style.display = 'none';
+                    firstLevelBox.classList.remove('box-open');
+                    const secondLevelBox = document.querySelectorAll('.blind-box')[1];
+                    if (secondLevelBox) {
+                        secondLevelBox.classList.remove('box-open');
+                    }
+
+                    // 重置显示
+                    firstLevelPrize.textContent = '谢谢参与';
+                    secondLevelPrize.textContent = '谢谢参与';
+                    currentAwardSpan.textContent = '';
+                    secondLevelInfo.textContent = '当前奖项: ';
+
+                    // 更新计数器
+                    updateFirstLevelCounter();
+                    updateSecondLevelCounter();
+
+                    showNotification('抽奖已重置，所有奖品已恢复！', 'success');
+                }
+            }
+
+            // 一级抽奖函数
+            function drawFirstLevel() {
+                if (firstLevelPrizes.length === 0) {
+                    showNotification('所有一级奖品已被抽完！', 'warning');
+                    return;
+                }
+
+                // 重置盒子状态
+                firstLevelBox.classList.remove('box-open');
+                secondLevelContainer.style.display = 'none';
+                const secondLevelBox = document.querySelectorAll('.blind-box')[1];
+                if (secondLevelBox) {
+                    secondLevelBox.classList.remove('box-open');
+                }
+
+                setTimeout(() => {
+                    const randomIndex = Math.floor(Math.random() * firstLevelPrizes.length);
+                    currentFirstLevelPrize = firstLevelPrizes[randomIndex];
+
+                    firstLevelPrizes.splice(randomIndex, 1);
+                    updateFirstLevelCounter();
+
+                    firstLevelPrize.textContent = currentFirstLevelPrize.name;
+                    firstLevelBox.classList.add('box-open');
+
+                    addToHistory(currentFirstLevelPrize.name, "一级");
+
+                    // 如果有一级奖品有二级抽奖机会
+                    if (currentFirstLevelPrize.secondChance) {
+                        setTimeout(() => {
+                            secondLevelContainer.style.display = 'flex';
+                            currentAwardSpan.textContent = currentFirstLevelPrize.name;
+                            secondLevelInfo.textContent = `当前奖项: ${currentFirstLevelPrize.name}`;
+                            updateSecondLevelCounter();
+                            createConfetti();
+
+                            setTimeout(() => {
+                                secondLevelContainer.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                            }, 300);
+                        }, 1000);
+                    } else {
+                        createConfetti();
+                    }
+
+                    if (firstLevelPrizes.length === 0) {
+                        setTimeout(() => {
+                            showNotification('所有一级奖品已被抽完！', 'warning');
+                            firstLevelBtn.disabled = true;
+                        }, 1000);
+                    }
+                }, 300);
+            }
+
+            // 二级抽奖函数
+            function drawSecondLevel() {
+                if (!currentFirstLevelPrize) {
+                    showNotification("请先抽取一级奖品！", 'info');
+                    return;
+                }
+
+                const award = currentFirstLevelPrize.name;
+                const availablePrizes = availableSecondLevelPrizes[award];
+
+                if (!availablePrizes || availablePrizes.length === 0) {
+                    showNotification(`${award}的二级奖品已被抽完！`, 'warning');
+                    return;
+                }
+
+                // 重置盒子状态
+                const secondLevelBox = document.querySelectorAll('.blind-box')[1];
+                if (secondLevelBox) {
+                    secondLevelBox.classList.remove('box-open');
+                }
+
+                setTimeout(() => {
+                    // 从该奖项的奖品池中取出一个奖品（不重复）
+                    const secondPrize = availablePrizes.shift();
+
+                    if (!secondPrize) {
+                        showNotification(`${award}的二级奖品已被抽完！`, 'warning');
+                        return;
+                    }
+
+                    // 更新剩余奖品数量
+                    updateSecondLevelCounter();
+
+                    // 显示奖品
+                    const prizeName = secondPrize.name;
+                    secondLevelPrize.textContent = '磁力链接';
+
+                    // 显示磁力链接的文件名
+                    const nameMatch = prizeName.match(/dn=([^&]+)/);
+                    if (nameMatch) {
+                        const fileName = decodeURIComponent(nameMatch[1]);
+                        secondLevelPrize.textContent = fileName.length > 15 ? fileName.substring(0, 15) + '...' : fileName;
+                    }
+
+                    secondLevelBox.classList.add('box-open');
+
+                    // 添加到历史记录
+                    addToHistory(prizeName, "二级", award);
+
+                    createConfetti();
+
+                    // 如果该奖项奖品抽完
+                    if (availablePrizes.length === 0) {
+                        setTimeout(() => {
+                            showNotification(`${award}的二级奖品已被抽完！`, 'warning');
+                        }, 1000);
+                    }
+                }, 300);
+            }
+
+            // 事件监听
+            firstLevelBtn.addEventListener('click', drawFirstLevel);
+            secondLevelBtn.addEventListener('click', drawSecondLevel);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            resetLotteryBtn.addEventListener('click', resetLottery);
+
+            // 触摸优化
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            loadHistory()
+        });
+    </script>
+</body>
+
+</html>
